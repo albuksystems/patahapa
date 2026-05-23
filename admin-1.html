@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pata Hapa v3 — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060709;--surface:#0d0f13;--surface2:#141720;--surface3:#1c1f28;
+  --border:rgba(255,255,255,0.055);--border2:rgba(255,255,255,0.11);
+  --text:#edeaf5;--text-dim:#8a8799;--text-muted:#4a4858;
+  --gold:#f5c842;--gold2:#e8a820;
+  --green:#2ecc71;--red:#e74c3c;--blue:#4a9eff;--orange:#ff7b39;
+  --mlo:#ff5c1a;--syo:#a78bfa;--ath:#4affb4;--pip:#ffc94a;
+  --radius:11px;--radius-lg:16px;
+  --font-head:'Bebas Neue',sans-serif;
+  --font-body:'Outfit',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --sidebar:230px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--orange);border-radius:2px}
+
+/* ===== VIEWS ===== */
+.view{display:none}.view.active{display:block}
+#adminLogin{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+.login-bg{position:absolute;inset:0;background:radial-gradient(ellipse 50% 50% at 30% 30%,rgba(255,123,57,0.07),transparent 60%),radial-gradient(ellipse 40% 40% at 70% 70%,rgba(245,200,66,0.05),transparent 60%);pointer-events:none}
+.login-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;mask-image:radial-gradient(ellipse 60% 60% at center,black,transparent)}
+.login-box{position:relative;z-index:1;width:100%;max-width:380px;margin:24px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;animation:box-in 0.4s ease both}
+@keyframes box-in{from{opacity:0;transform:translateY(20px) scale(0.97)}to{opacity:1;transform:none}}
+.login-head{padding:28px 28px 20px;border-bottom:1px solid var(--border)}
+.login-logo{font-family:var(--font-head);font-size:30px;letter-spacing:2px;color:var(--text);margin-bottom:2px}
+.login-logo span{color:var(--orange)}
+.login-sub{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
+.login-body{padding:24px 28px 28px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-family:var(--font-mono);font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.form-input,.form-select{width:100%;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-family:var(--font-body);outline:none;transition:all 0.2s}
+.form-input:focus,.form-select:focus{border-color:rgba(255,123,57,0.4);box-shadow:0 0 0 3px rgba(255,123,57,0.07);background:var(--surface3)}
+.form-input::placeholder{color:var(--text-muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 18px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;font-family:var(--font-body);text-decoration:none}
+.btn-orange{background:var(--orange);color:#fff}.btn-orange:hover{background:#e06730;transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,123,57,0.35)}
+.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:var(--gold2)}
+.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--surface2)}
+.btn-danger{background:rgba(231,76,60,0.12);color:var(--red);border:1px solid rgba(231,76,60,0.18)}.btn-danger:hover{background:rgba(231,76,60,0.22)}
+.btn-success{background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.18)}.btn-success:hover{background:rgba(46,204,113,0.22)}
+.btn-sm{padding:7px 13px;font-size:12px}
+.btn-full{width:100%}
+.login-error{background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:14px;display:none}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--orange);border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== SHELL ===== */
+#adminShell{display:none;min-height:100vh}
+#adminShell.active{display:flex}
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-text{font-family:var(--font-head);font-size:24px;letter-spacing:2px}
+.sb-logo-text span{color:var(--orange)}
+.sb-admin-tag{font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.nav-menu{padding:10px 0;flex:1;overflow-y:auto}
+.nav-sec{padding:14px 16px 4px;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--text-dim);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;text-decoration:none}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.02)}
+.nav-item.active{color:var(--orange);background:rgba(255,123,57,0.05);border-left-color:var(--orange)}
+.nav-item .ni{font-size:15px;width:18px;text-align:center}
+.sb-bottom{padding:14px 16px;border-top:1px solid var(--border)}
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;background:var(--bg)}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(6,7,9,0.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-family:var(--font-head);font-size:20px;letter-spacing:1px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.content{padding:24px}
+
+/* ===== STATS ===== */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color 0.2s}
+.stat-card:hover{border-color:var(--border2)}
+.sc-icon{font-size:20px;margin-bottom:10px}
+.sc-num{font-family:var(--font-head);font-size:30px;letter-spacing:1px;line-height:1;margin-bottom:3px}
+.sc-label{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
+.sc-sub{font-size:11px;color:var(--text-dim);margin-top:5px}
+.stat-card.highlight{border-color:rgba(255,123,57,0.2);background:linear-gradient(135deg,rgba(255,123,57,0.04),var(--surface))}
+.stat-card.highlight .sc-num{color:var(--orange)}
+
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto;border-radius:var(--radius)}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{padding:10px 14px;text-align:left;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface2)}
+.data-table td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text-dim);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,0.015);color:var(--text)}
+.td-biz{display:flex;align-items:center;gap:10px}
+.td-emoji{width:32px;height:32px;border-radius:8px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.td-name{font-weight:600;color:var(--text);font-size:13px}
+.td-sub{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:0.5px}
+.badge-active{background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.2);color:var(--green)}
+.badge-suspended{background:rgba(231,76,60,0.12);border:1px solid rgba(231,76,60,0.2);color:var(--red)}
+.badge-deleted{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-muted)}
+.badge-free{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-dim)}
+.badge-starter{background:rgba(74,158,255,0.12);border:1px solid rgba(74,158,255,0.2);color:var(--blue)}
+.badge-pro{background:rgba(245,200,66,0.12);border:1px solid rgba(245,200,66,0.2);color:var(--gold)}
+.corridor-chip{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.cc-mlo{background:var(--mlo)}.cc-syo{background:var(--syo)}.cc-ath{background:var(--ath)}.cc-pip{background:var(--pip)}
+.actions-cell{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ===== CARD ===== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
+.card-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.card-body{padding:18px}
+
+/* ===== FILTERS ===== */
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.filter-select{padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-size:13px;font-family:var(--font-body);outline:none;cursor:pointer}
+.filter-select:focus{border-color:rgba(255,123,57,0.35);color:var(--text)}
+.filter-input{padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-size:13px;font-family:var(--font-body);outline:none}
+.filter-input:focus{border-color:rgba(255,123,57,0.35);color:var(--text)}
+.filter-input::placeholder{color:var(--text-muted)}
+.result-count{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:auto}
+
+/* ===== ANALYTICS ===== */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:700px){.analytics-grid{grid-template-columns:1fr}}
+.chart-bar-list{display:flex;flex-direction:column;gap:10px}
+.chart-bar-item{display:flex;align-items:center;gap:10px}
+.chart-bar-label{font-size:12px;color:var(--text-dim);min-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-bar-track{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--orange),var(--gold));transition:width 0.8s ease}
+.chart-bar-num{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);min-width:36px;text-align:right}
+
+/* ===== CORRIDOR SUMMARY ===== */
+.corridor-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:700px){.corridor-cards{grid-template-columns:repeat(2,1fr)}}
+.corridor-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:all 0.2s;cursor:pointer}
+.corridor-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+.cc-label{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.cc-count{font-family:var(--font-head);font-size:28px;line-height:1;margin-bottom:3px}
+.cc-sub{font-size:11px;color:var(--text-muted)}
+.cc-mlo-card{border-color:rgba(255,92,26,0.15)}.cc-mlo-card .cc-count{color:var(--mlo)}
+.cc-syo-card{border-color:rgba(167,139,250,0.15)}.cc-syo-card .cc-count{color:var(--syo)}
+.cc-ath-card{border-color:rgba(74,255,180,0.15)}.cc-ath-card .cc-count{color:var(--ath)}
+.cc-pip-card{border-color:rgba(255,201,74,0.15)}.cc-pip-card .cc-count{color:var(--pip)}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:440px;max-height:90vh;overflow-y:auto;animation:modal-in 0.22s ease both}
+@keyframes modal-in{from{opacity:0;transform:scale(0.95) translateY(8px)}to{opacity:1;transform:none}}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:700}
+.modal-close{width:28px;height:28px;border-radius:7px;background:transparent;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.modal-close:hover{border-color:var(--border2);color:var(--text)}
+.modal-body{padding:22px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* ===== TOAST ===== */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;animation:t-in 0.25s ease both;pointer-events:auto;min-width:220px;box-shadow:0 8px 28px rgba(0,0,0,0.4)}
+@keyframes t-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.toast.success{border-color:rgba(46,204,113,0.25)}.toast.error{border-color:rgba(231,76,60,0.25)}
+
+/* ===== EMPTY / LOADING ===== */
+.empty{text-align:center;padding:48px 24px;color:var(--text-muted)}
+.empty-icon{font-size:38px;display:block;margin-bottom:10px;opacity:0.4}
+.loading-row{text-align:center;padding:48px;color:var(--text-muted)}
+</style>
+</head>
+<body>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ===== ADMIN LOGIN ===== -->
+<div id="adminLogin">
+  <div class="login-bg"></div>
+  <div class="login-grid"></div>
+  <div class="login-box">
+    <div class="login-head">
+      <div class="login-logo">PATA<span>HAPA</span></div>
+      <div class="login-sub">Admin Panel · Albuk Global</div>
+    </div>
+    <div style="padding:22px 28px 28px">
+      <div class="login-error" id="loginError"></div>
+      <div class="form-group">
+        <label class="form-label">Admin Email</label>
+        <input class="form-input" type="email" id="adminEmail" placeholder="admin@albukglobal.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="adminPassword" placeholder="••••••••">
+      </div>
+      <button class="btn btn-orange btn-full" onclick="handleAdminLogin()" id="adminLoginBtn">Access Admin Panel</button>
+      <div style="text-align:center;margin-top:14px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">
+        <a href="marketplace.html" style="color:var(--text-muted);text-decoration:none">← Back to Marketplace</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN SHELL ===== -->
+<div id="adminShell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-text">PATA<span>HAPA</span></div>
+      <div class="sb-admin-tag">Admin Panel</div>
+    </div>
+    <nav class="nav-menu">
+      <div class="nav-sec">Overview</div>
+      <a class="nav-item active" onclick="showPage('overview')" href="#">
+        <span class="ni">📊</span> Overview
+      </a>
+      <a class="nav-item" onclick="showPage('businesses')" href="#">
+        <span class="ni">🏪</span> Businesses
+      </a>
+      <a class="nav-item" onclick="showPage('analytics')" href="#">
+        <span class="ni">📈</span> Analytics
+      </a>
+      <div class="nav-sec">Management</div>
+      <a class="nav-item" onclick="showPage('approvals')" href="#">
+        <span class="ni">✅</span> Approvals
+      </a>
+      <a class="nav-item" onclick="showPage('tiers')" href="#">
+        <span class="ni">⭐</span> Tier Management
+      </a>
+      <div class="nav-sec">System</div>
+      <a class="nav-item" onclick="seedDemoData()" href="#">
+        <span class="ni">🌱</span> Seed Demo Data
+      </a>
+      <a class="nav-item" href="marketplace.html">
+        <span class="ni">🌐</span> View Marketplace
+      </a>
+      <a class="nav-item" href="business.html">
+        <span class="ni">🏪</span> Business Portal
+      </a>
+    </nav>
+    <div class="sb-bottom">
+      <button class="btn btn-ghost btn-sm btn-full" onclick="adminLogout()" style="justify-content:flex-start;gap:8px">🚪 Log Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="pageTitle">Overview</div>
+      <div class="topbar-actions">
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="adminEmailLabel"></span>
+        <button class="btn btn-ghost btn-sm" onclick="refreshCurrent()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- ── OVERVIEW ── -->
+      <div id="page-overview" class="view active">
+        <div id="overviewLoading" class="loading-row"><div class="spinner" style="width:28px;height:28px;margin:0 auto 10px"></div><div style="font-family:var(--font-mono);font-size:11px">Loading…</div></div>
+        <div id="overviewContent" style="display:none">
+          <div class="stats-row" id="overviewStats"></div>
+          <div class="corridor-cards" id="corridorCards"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card">
+              <div class="card-head"><div class="card-title">🏪 Latest Businesses</div><button class="btn btn-ghost btn-sm" onclick="showPage('businesses')">View All</button></div>
+              <div class="card-body"><div id="latestBizList"></div></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div class="card-title">🔍 Top Searches</div></div>
+              <div class="card-body"><div class="chart-bar-list" id="topSearchList"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BUSINESSES ── -->
+      <div id="page-businesses" class="view">
+        <div class="filter-row">
+          <input class="filter-input" id="bizSearch" placeholder="Search by name…" oninput="filterBusinesses()">
+          <select class="filter-select" id="filterCorridor" onchange="filterBusinesses()">
+            <option value="">All Corridors</option>
+            <option value="mlolongo">Mlolongo</option>
+            <option value="syokimau">Syokimau</option>
+            <option value="athiriver">Athi River</option>
+            <option value="pipeline">Pipeline</option>
+          </select>
+          <select class="filter-select" id="filterStatus" onchange="filterBusinesses()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+          </select>
+          <select class="filter-select" id="filterTier" onchange="filterBusinesses()">
+            <option value="">All Tiers</option>
+            <option value="free">Free</option>
+            <option value="starter">Starter</option>
+            <option value="pro">Pro</option>
+          </select>
+          <span class="result-count" id="bizResultCount"></span>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">🏪 All Businesses</div>
+            <button class="btn btn-orange btn-sm" onclick="loadBusinesses()">Reload</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="bizTable">
+              <thead>
+                <tr>
+                  <th>Business</th><th>Corridor</th><th>Tier</th>
+                  <th>Status</th><th>Products</th><th>Clicks</th><th>Joined</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bizTableBody">
+                <tr><td colspan="8" class="loading-row"><div class="spinner"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANALYTICS ── -->
+      <div id="page-analytics" class="view">
+        <div class="filter-row">
+          <select class="filter-select" id="analyticsDays" onchange="loadAnalytics()">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </div>
+        <div id="analyticsLoading" class="loading-row"><div class="spinner" style="width:28px;height:28px;margin:0 auto 10px"></div></div>
+        <div id="analyticsContent" style="display:none">
+          <div class="stats-row" id="analyticsStats"></div>
+          <div class="analytics-grid">
+            <div class="card">
+              <div class="card-head"><div class="card-title">🔍 Top Search Terms</div></div>
+              <div class="card-body"><div class="chart-bar-list" id="searchBarList"></div></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div class="card-title">📍 Activity by Corridor</div></div>
+              <div class="card-body"><div class="chart-bar-list" id="corridorBarList"></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title">📋 Events by Type</div></div>
+            <div class="card-body"><div class="chart-bar-list" id="eventTypeList"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── APPROVALS ── -->
+      <div id="page-approvals" class="view">
+        <div class="card">
+          <div class="card-head"><div class="card-title">✅ Suspended Businesses</div></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Business</th><th>Corridor</th><th>Email</th><th>Phone</th><th>Actions</th></tr></thead>
+              <tbody id="suspendedTableBody">
+                <tr><td colspan="5" class="loading-row"><div class="spinner"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TIER MANAGEMENT ── -->
+      <div id="page-tiers" class="view">
+        <div class="card">
+          <div class="card-head"><div class="card-title">⭐ Tier Management</div></div>
+          <div class="card-body" style="margin-bottom:0">
+            <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px">Change a business's tier after confirming M-Pesa payment via Till <strong style="color:var(--gold)">4984254</strong>.</div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Business</th><th>Current Tier</th><th>Corridor</th><th>Change Tier</th></tr></thead>
+              <tbody id="tierTableBody">
+                <tr><td colspan="4" class="loading-row"><div class="spinner"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<!-- ===== BUSINESS DETAIL MODAL ===== -->
+<div class="modal-overlay" id="bizModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="bizModalTitle">Business Details</div>
+      <button class="modal-close" onclick="closeModal('bizModal')">✕</button>
+    </div>
+    <div class="modal-body" id="bizModalBody"></div>
+    <div class="modal-footer" id="bizModalFooter"></div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const API_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL'; // ← Same URL as backend
+const DEMO_MODE = API_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+
+// ===== STATE =====
+let STATE = {
+  token: null, email: null,
+  allBusinesses: [], filteredBusinesses: [],
+  analytics: null, currentPage: 'overview'
+};
+
+// ===== STORAGE =====
+function saveAdminSession(token, email) {
+  sessionStorage.setItem('ph_admin_token', token);
+  sessionStorage.setItem('ph_admin_email', email);
+}
+function loadAdminSession() {
+  STATE.token = sessionStorage.getItem('ph_admin_token');
+  STATE.email = sessionStorage.getItem('ph_admin_email');
+}
+function clearAdminSession() {
+  sessionStorage.removeItem('ph_admin_token');
+  sessionStorage.removeItem('ph_admin_email');
+}
+
+// ===== API =====
+async function api(action, params = {}) {
+  const payload = { action, token: STATE.token || '', ...params };
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (e) {
+    return { ok: false, error: 'Network error.' };
+  }
+}
+
+// ===== DEMO DATA =====
+const DEMO_BIZS = [
+  { id:'BIZ_001', name:'Vision Electronics', owner:'Vision', email:'vision@demo.cm', phone:'0700000001', corridor:'mlolongo', category:'Electronics', tier:'pro', status:'active', logo_emoji:'📱', click_count:182, promo_count:7, product_count:8, created_at:'2024-11-01T10:00:00Z' },
+  { id:'BIZ_002', name:'Liberty Beauty Hub', owner:'Liberty', email:'liberty@demo.cm', phone:'0700000002', corridor:'mlolongo', category:'Beauty', tier:'starter', status:'active', logo_emoji:'💄', click_count:94, promo_count:4, product_count:12, created_at:'2024-11-15T09:00:00Z' },
+  { id:'BIZ_003', name:'Kabbo Shop', owner:'Al', email:'kabbo@demo.cm', phone:'0700000003', corridor:'mlolongo', category:'General Retail', tier:'pro', status:'active', logo_emoji:'🏪', click_count:221, promo_count:5, product_count:18, created_at:'2024-10-01T08:00:00Z' },
+  { id:'BIZ_004', name:'Gezba Kinyozi', owner:'Gezba', email:'gezba@demo.cm', phone:'0700000004', corridor:'mlolongo', category:'Barber Shop', tier:'free', status:'active', logo_emoji:'✂️', click_count:47, promo_count:2, product_count:2, created_at:'2025-01-10T11:00:00Z' },
+  { id:'BIZ_005', name:'Konnect Group', owner:'Frida', email:'konnect@demo.cm', phone:'0700000005', corridor:'syokimau', category:'Tech & Printing', tier:'pro', status:'active', logo_emoji:'🖨️', click_count:138, promo_count:6, product_count:10, created_at:'2024-12-01T10:00:00Z' },
+  { id:'BIZ_006', name:'Jamel Cosmetics', owner:'Jamel', email:'jamel@demo.cm', phone:'0700000006', corridor:'syokimau', category:'Beauty', tier:'starter', status:'active', logo_emoji:'🌸', click_count:76, promo_count:3, product_count:9, created_at:'2025-01-20T12:00:00Z' },
+  { id:'BIZ_007', name:'Royal Beauty Hub', owner:'Royal', email:'royal@demo.cm', phone:'0700000007', corridor:'athiriver', category:'Beauty & Salon', tier:'starter', status:'active', logo_emoji:'👑', click_count:103, promo_count:4, product_count:7, created_at:'2024-12-15T09:30:00Z' },
+  { id:'BIZ_008', name:'Diamond Uniforms', owner:'Diamond', email:'diamond@demo.cm', phone:'0700000008', corridor:'athiriver', category:'Clothing', tier:'free', status:'suspended', logo_emoji:'🎓', click_count:28, promo_count:1, product_count:3, created_at:'2025-02-01T10:00:00Z' },
+  { id:'BIZ_009', name:'Hapii Products', owner:'Hapii', email:'hapii@demo.cm', phone:'0700000009', corridor:'pipeline', category:'FMCG', tier:'pro', status:'active', logo_emoji:'🧴', click_count:94, promo_count:5, product_count:15, created_at:'2024-11-20T08:00:00Z' },
+  { id:'BIZ_010', name:'Panaki Restaurant', owner:'Panaki', email:'panaki@demo.cm', phone:'0700000010', corridor:'pipeline', category:'Restaurant', tier:'free', status:'active', logo_emoji:'🍖', click_count:62, promo_count:2, product_count:4, created_at:'2025-01-05T09:00:00Z' },
+];
+const DEMO_ANALYTICS = {
+  ok:true, period_days:30, total_events:842,
+  by_type:{ search:498, biz_click:218, login:67, registration:34, generic:25 },
+  by_corridor:{ mlolongo:312, syokimau:198, athiriver:174, pipeline:158 },
+  top_searches:[
+    {term:'milk',count:89},{term:'phones',count:74},{term:'uniforms',count:62},
+    {term:'gas refill',count:54},{term:'blenders',count:48},{term:'beauty salon',count:43},
+    {term:'electronics',count:38},{term:'barber',count:34},{term:'food',count:31},{term:'hardware',count:24},
+  ],
+};
+
+async function apiCall(action, params = {}) {
+  if (DEMO_MODE) {
+    await new Promise(r => setTimeout(r, 350));
+    // Demo responses
+    if (action === 'loginBiz') return { ok:true, token:'admin_demo_token', business:{ email:'admin@demo.cm' } };
+    if (action === 'adminListBiz') {
+      let list = [...DEMO_BIZS];
+      if (params.corridor) list = list.filter(b => b.corridor === params.corridor);
+      if (params.status) list = list.filter(b => b.status === params.status);
+      if (params.tier) list = list.filter(b => b.tier === params.tier);
+      return { ok:true, businesses:list, count:list.length };
+    }
+    if (action === 'adminSuspendBiz') return { ok:true, message:'Suspended (demo)' };
+    if (action === 'adminActivateBiz') return { ok:true, message:'Activated (demo)' };
+    if (action === 'adminSetTier') return { ok:true, message:'Tier updated (demo)' };
+    if (action === 'adminAnalytics') return DEMO_ANALYTICS;
+    if (action === 'adminSeedData') return { ok:true, message:'Seeded (demo mode — no real data written)' };
+    if (action === 'adminDeleteBiz') return { ok:true, message:'Deleted (demo)' };
+    if (action === 'logout') return { ok:true };
+    return { ok:false, error:'Unknown demo action: '+action };
+  }
+  return api(action, params);
+}
+
+// ===== INIT =====
+window.onload = function() {
+  loadAdminSession();
+  if (STATE.token) {
+    showShell();
+  } else {
+    document.getElementById('adminLogin').style.display = 'flex';
+  }
+};
+
+async function handleAdminLogin() {
+  const email = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPassword').value;
+  if (!email || !password) { showLoginError('Email and password required.'); return; }
+  const btn = document.getElementById('adminLoginBtn');
+  btn.innerHTML = '<span class="spinner"></span> Verifying…'; btn.disabled = true;
+  // Login via same business endpoint — admin check happens on each admin API call
+  const res = await apiCall('loginBiz', { email, password });
+  btn.innerHTML = 'Access Admin Panel'; btn.disabled = false;
+  if (res.ok) {
+    saveAdminSession(res.token, email);
+    STATE.token = res.token; STATE.email = email;
+    showShell();
+  } else {
+    showLoginError(res.error || 'Login failed.');
+  }
+}
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = '⚠ ' + msg; el.style.display = 'block';
+}
+function showShell() {
+  document.getElementById('adminLogin').style.display = 'none';
+  document.getElementById('adminShell').classList.add('active');
+  document.getElementById('adminEmailLabel').textContent = STATE.email || '';
+  if (DEMO_MODE) toast('Demo mode active', 'info');
+  loadOverview();
+}
+function adminLogout() {
+  apiCall('logout', {});
+  clearAdminSession();
+  location.reload();
+}
+
+// ===== NAVIGATION =====
+function showPage(page) {
+  STATE.currentPage = page;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  const titles = { overview:'Overview', businesses:'Businesses', analytics:'Analytics', approvals:'Approvals', tiers:'Tier Management' };
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  // Load on demand
+  if (page === 'businesses' && !STATE.allBusinesses.length) loadBusinesses();
+  if (page === 'analytics') loadAnalytics();
+  if (page === 'approvals') loadApprovals();
+  if (page === 'tiers') loadTierTable();
+}
+function refreshCurrent() { showPage(STATE.currentPage); }
+
+// ===== OVERVIEW =====
+async function loadOverview() {
+  document.getElementById('overviewLoading').style.display = 'block';
+  document.getElementById('overviewContent').style.display = 'none';
+  const [bizRes, analRes] = await Promise.all([
+    apiCall('adminListBiz', {}),
+    apiCall('adminAnalytics', { days: 30 }),
+  ]);
+  document.getElementById('overviewLoading').style.display = 'none';
+  if (!bizRes.ok) { toast(bizRes.error, 'error'); return; }
+  STATE.allBusinesses = bizRes.businesses || [];
+  STATE.analytics = analRes;
+  renderOverview();
+  document.getElementById('overviewContent').style.display = 'block';
+}
+
+function renderOverview() {
+  const bizs = STATE.allBusinesses;
+  const anal = STATE.analytics || {};
+  const active = bizs.filter(b => b.status === 'active').length;
+  const suspended = bizs.filter(b => b.status === 'suspended').length;
+  const pro = bizs.filter(b => b.tier === 'pro').length;
+
+  document.getElementById('overviewStats').innerHTML = `
+    <div class="stat-card highlight"><div class="sc-icon">🏪</div><div class="sc-num">${bizs.length}</div><div class="sc-label">Total Businesses</div><div class="sc-sub">${active} active · ${suspended} suspended</div></div>
+    <div class="stat-card"><div class="sc-icon">📊</div><div class="sc-num">${anal.total_events||0}</div><div class="sc-label">Events (30d)</div></div>
+    <div class="stat-card"><div class="sc-icon">🔍</div><div class="sc-num">${(anal.by_type||{}).search||0}</div><div class="sc-label">Searches (30d)</div></div>
+    <div class="stat-card"><div class="sc-icon">⭐</div><div class="sc-num">${pro}</div><div class="sc-label">Pro Businesses</div><div class="sc-sub">${bizs.filter(b=>b.tier==='starter').length} starter · ${bizs.filter(b=>b.tier==='free').length} free</div></div>
+  `;
+  // Corridor cards
+  const corrCounts = { mlolongo:0, syokimau:0, athiriver:0, pipeline:0 };
+  bizs.forEach(b => { if (corrCounts[b.corridor]!==undefined) corrCounts[b.corridor]++; });
+  document.getElementById('corridorCards').innerHTML = [
+    { key:'mlolongo', label:'Mlolongo', cls:'cc-mlo-card', emoji:'🏪' },
+    { key:'syokimau', label:'Syokimau', cls:'cc-syo-card', emoji:'🌆' },
+    { key:'athiriver', label:'Athi River', cls:'cc-ath-card', emoji:'🏭' },
+    { key:'pipeline', label:'Pipeline', cls:'cc-pip-card', emoji:'🏘️' },
+  ].map(c => `
+    <div class="corridor-card ${c.cls}" onclick="filterToCorridor('${c.key}')">
+      <div class="cc-label" style="color:var(--text-muted)">${c.emoji} ${c.label}</div>
+      <div class="cc-count">${corrCounts[c.key]}</div>
+      <div class="cc-sub">businesses</div>
+    </div>`).join('');
+
+  // Latest 5 businesses
+  const latest = [...bizs].sort((a,b) => new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
+  document.getElementById('latestBizList').innerHTML = latest.length ? `
+    <table class="data-table" style="font-size:12px">
+      ${latest.map(b => `<tr>
+        <td><div class="td-biz"><div class="td-emoji">${b.logo_emoji||'🏪'}</div><div><div class="td-name">${b.name}</div><div class="td-sub">${capitalize(b.corridor)}</div></div></div></td>
+        <td><span class="badge badge-${b.tier}">${b.tier.toUpperCase()}</span></td>
+        <td><span class="badge badge-${b.status}">${b.status}</span></td>
+      </tr>`).join('')}
+    </table>` : '<div class="empty"><span class="empty-icon">🏪</span>No businesses yet</div>';
+
+  // Top searches
+  const searches = (anal.top_searches || []).slice(0, 8);
+  const maxS = searches[0]?.count || 1;
+  document.getElementById('topSearchList').innerHTML = searches.map(s => `
+    <div class="chart-bar-item">
+      <div class="chart-bar-label">${s.term}</div>
+      <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round((s.count/maxS)*100)}%"></div></div>
+      <div class="chart-bar-num">${s.count}</div>
+    </div>`).join('') || '<div style="color:var(--text-muted);font-size:13px">No search data yet.</div>';
+}
+
+function filterToCorridor(corridor) {
+  showPage('businesses');
+  document.getElementById('filterCorridor').value = corridor;
+  filterBusinesses();
+}
+
+// ===== BUSINESSES =====
+async function loadBusinesses() {
+  document.getElementById('bizTableBody').innerHTML = '<tr><td colspan="8" class="loading-row"><div class="spinner"></div></td></tr>';
+  const res = await apiCall('adminListBiz', {});
+  if (!res.ok) { toast(res.error, 'error'); return; }
+  STATE.allBusinesses = res.businesses || [];
+  STATE.filteredBusinesses = [...STATE.allBusinesses];
+  renderBizTable(STATE.filteredBusinesses);
+}
+
+function filterBusinesses() {
+  const q = (document.getElementById('bizSearch').value || '').toLowerCase();
+  const corridor = document.getElementById('filterCorridor').value;
+  const status = document.getElementById('filterStatus').value;
+  const tier = document.getElementById('filterTier').value;
+  STATE.filteredBusinesses = STATE.allBusinesses.filter(b => {
+    if (q && !b.name.toLowerCase().includes(q) && !b.owner.toLowerCase().includes(q)) return false;
+    if (corridor && b.corridor !== corridor) return false;
+    if (status && b.status !== status) return false;
+    if (tier && b.tier !== tier) return false;
+    return true;
+  });
+  renderBizTable(STATE.filteredBusinesses);
+}
+
+function renderBizTable(bizs) {
+  document.getElementById('bizResultCount').textContent = bizs.length + ' businesses';
+  const tbody = document.getElementById('bizTableBody');
+  if (!bizs.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><span class="empty-icon">🏪</span>No businesses match filters.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = bizs.map(b => `
+  <tr>
+    <td>
+      <div class="td-biz">
+        <div class="td-emoji">${b.logo_emoji||'🏪'}</div>
+        <div>
+          <div class="td-name">${b.name}</div>
+          <div class="td-sub">${b.email}</div>
+        </div>
+      </div>
+    </td>
+    <td>
+      <span class="corridor-chip cc-${b.corridor==='athiriver'?'ath':b.corridor.slice(0,3)}"></span>
+      ${capitalize(b.corridor)}
+    </td>
+    <td><span class="badge badge-${b.tier}">${b.tier.toUpperCase()}</span></td>
+    <td><span class="badge badge-${b.status}">${b.status}</span></td>
+    <td style="font-family:var(--font-mono)">${b.product_count||0}</td>
+    <td style="font-family:var(--font-mono)">${b.click_count||0}</td>
+    <td style="font-family:var(--font-mono);font-size:11px">${fmtDate(b.created_at)}</td>
+    <td>
+      <div class="actions-cell">
+        <button class="btn btn-ghost btn-sm" onclick="viewBiz(${JSON.stringify(b).replace(/"/g,'&quot;')})">View</button>
+        ${b.status==='active'
+          ? `<button class="btn btn-danger btn-sm" onclick="suspendBiz('${b.id}','${b.name}')">Suspend</button>`
+          : `<button class="btn btn-success btn-sm" onclick="activateBiz('${b.id}','${b.name}')">Activate</button>`}
+      </div>
+    </td>
+  </tr>`).join('');
+}
+
+function viewBiz(b) {
+  document.getElementById('bizModalTitle').textContent = b.logo_emoji + ' ' + b.name;
+  document.getElementById('bizModalBody').innerHTML = `
+    <table class="data-table" style="font-size:13px">
+      <tr><td style="color:var(--text-muted)">ID</td><td style="font-family:var(--font-mono);font-size:11px">${b.id}</td></tr>
+      <tr><td style="color:var(--text-muted)">Owner</td><td>${b.owner}</td></tr>
+      <tr><td style="color:var(--text-muted)">Email</td><td>${b.email}</td></tr>
+      <tr><td style="color:var(--text-muted)">Phone</td><td>${b.phone}</td></tr>
+      <tr><td style="color:var(--text-muted)">Corridor</td><td>${capitalize(b.corridor)}</td></tr>
+      <tr><td style="color:var(--text-muted)">Category</td><td>${b.category}</td></tr>
+      <tr><td style="color:var(--text-muted)">Tier</td><td><span class="badge badge-${b.tier}">${b.tier.toUpperCase()}</span></td></tr>
+      <tr><td style="color:var(--text-muted)">Status</td><td><span class="badge badge-${b.status}">${b.status}</span></td></tr>
+      <tr><td style="color:var(--text-muted)">Products</td><td>${b.product_count||0}</td></tr>
+      <tr><td style="color:var(--text-muted)">Profile Clicks</td><td>${b.click_count||0}</td></tr>
+      <tr><td style="color:var(--text-muted)">Promos Created</td><td>${b.promo_count||0}</td></tr>
+      <tr><td style="color:var(--text-muted)">Joined</td><td>${fmtDate(b.created_at)}</td></tr>
+    </table>`;
+  document.getElementById('bizModalFooter').innerHTML = `
+    <button class="btn btn-ghost" onclick="closeModal('bizModal')">Close</button>
+    <a class="btn btn-green btn-sm" href="https://wa.me/${(b.phone||'').replace(/[^0-9]/g,'')}?text=Hi+${encodeURIComponent(b.name)}%2C+this+is+Albuk+Global+Pata+Hapa+support." target="_blank">📲 WhatsApp</a>
+    ${b.status==='active'
+      ? `<button class="btn btn-danger btn-sm" onclick="closeModal('bizModal');suspendBiz('${b.id}','${b.name}')">Suspend</button>`
+      : `<button class="btn btn-success btn-sm" onclick="closeModal('bizModal');activateBiz('${b.id}','${b.name}')">Activate</button>`}
+  `;
+  document.getElementById('bizModal').classList.add('open');
+}
+
+async function suspendBiz(id, name) {
+  if (!confirm(`Suspend "${name}"? They will not appear in the marketplace.`)) return;
+  const res = await apiCall('adminSuspendBiz', { biz_id: id });
+  if (res.ok) {
+    toast(`${name} suspended.`, 'success');
+    updateLocalBizStatus(id, 'suspended');
+    filterBusinesses();
+  } else { toast(res.error, 'error'); }
+}
+async function activateBiz(id, name) {
+  const res = await apiCall('adminActivateBiz', { biz_id: id });
+  if (res.ok) {
+    toast(`${name} activated.`, 'success');
+    updateLocalBizStatus(id, 'active');
+    filterBusinesses();
+  } else { toast(res.error, 'error'); }
+}
+function updateLocalBizStatus(id, status) {
+  const b = STATE.allBusinesses.find(b => b.id === id);
+  if (b) b.status = status;
+}
+
+// ===== ANALYTICS =====
+async function loadAnalytics() {
+  document.getElementById('analyticsLoading').style.display = 'block';
+  document.getElementById('analyticsContent').style.display = 'none';
+  const days = document.getElementById('analyticsDays').value;
+  const res = await apiCall('adminAnalytics', { days });
+  document.getElementById('analyticsLoading').style.display = 'none';
+  if (!res.ok) { toast(res.error, 'error'); return; }
+  STATE.analytics = res;
+  renderAnalytics(res);
+  document.getElementById('analyticsContent').style.display = 'block';
+}
+
+function renderAnalytics(d) {
+  document.getElementById('analyticsStats').innerHTML = `
+    <div class="stat-card highlight"><div class="sc-icon">📊</div><div class="sc-num">${d.total_events}</div><div class="sc-label">Total Events</div><div class="sc-sub">Last ${d.period_days} days</div></div>
+    <div class="stat-card"><div class="sc-icon">🔍</div><div class="sc-num">${(d.by_type||{}).search||0}</div><div class="sc-label">Searches</div></div>
+    <div class="stat-card"><div class="sc-icon">👁️</div><div class="sc-num">${(d.by_type||{}).biz_click||0}</div><div class="sc-label">Profile Clicks</div></div>
+    <div class="stat-card"><div class="sc-icon">🆕</div><div class="sc-num">${(d.by_type||{}).registration||0}</div><div class="sc-label">New Registrations</div></div>
+  `;
+  renderBarList('searchBarList', d.top_searches || [], 'term', 'count');
+  const corrData = Object.entries(d.by_corridor || {}).map(([term,count])=>({term:capitalize(term),count})).sort((a,b)=>b.count-a.count);
+  renderBarList('corridorBarList', corrData, 'term', 'count');
+  const typeData = Object.entries(d.by_type || {}).map(([term,count])=>({term,count})).sort((a,b)=>b.count-a.count);
+  renderBarList('eventTypeList', typeData, 'term', 'count');
+}
+
+function renderBarList(elId, data, labelKey, countKey) {
+  const max = data[0]?.[countKey] || 1;
+  document.getElementById(elId).innerHTML = data.length ? data.map(d => `
+    <div class="chart-bar-item">
+      <div class="chart-bar-label">${d[labelKey]}</div>
+      <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round((d[countKey]/max)*100)}%"></div></div>
+      <div class="chart-bar-num">${d[countKey]}</div>
+    </div>`).join('') : '<div style="color:var(--text-muted);font-size:13px">No data yet.</div>';
+}
+
+// ===== APPROVALS =====
+async function loadApprovals() {
+  document.getElementById('suspendedTableBody').innerHTML = '<tr><td colspan="5" class="loading-row"><div class="spinner"></div></td></tr>';
+  if (!STATE.allBusinesses.length) {
+    const res = await apiCall('adminListBiz', {});
+    STATE.allBusinesses = res.businesses || [];
+  }
+  const suspended = STATE.allBusinesses.filter(b => b.status === 'suspended');
+  const tbody = document.getElementById('suspendedTableBody');
+  tbody.innerHTML = suspended.length ? suspended.map(b => `
+    <tr>
+      <td><div class="td-biz"><div class="td-emoji">${b.logo_emoji||'🏪'}</div><div class="td-name">${b.name}</div></div></td>
+      <td>${capitalize(b.corridor)}</td>
+      <td>${b.email}</td>
+      <td>${b.phone}</td>
+      <td><button class="btn btn-success btn-sm" onclick="activateBiz('${b.id}','${b.name}')">Activate</button></td>
+    </tr>`).join('')
+    : '<tr><td colspan="5"><div class="empty"><span class="empty-icon">✅</span>No suspended businesses.</div></td></tr>';
+}
+
+// ===== TIER TABLE =====
+async function loadTierTable() {
+  if (!STATE.allBusinesses.length) {
+    const res = await apiCall('adminListBiz', {});
+    STATE.allBusinesses = res.businesses || [];
+  }
+  const tbody = document.getElementById('tierTableBody');
+  tbody.innerHTML = STATE.allBusinesses.filter(b => b.status !== 'deleted').map(b => `
+    <tr>
+      <td><div class="td-biz"><div class="td-emoji">${b.logo_emoji||'🏪'}</div><div><div class="td-name">${b.name}</div><div class="td-sub">${b.email}</div></div></div></td>
+      <td><span class="badge badge-${b.tier}">${b.tier.toUpperCase()}</span></td>
+      <td>${capitalize(b.corridor)}</td>
+      <td>
+        <select class="filter-select" id="tier-sel-${b.id}" style="font-size:12px;padding:5px 8px">
+          <option value="free" ${b.tier==='free'?'selected':''}>Free</option>
+          <option value="starter" ${b.tier==='starter'?'selected':''}>Starter</option>
+          <option value="pro" ${b.tier==='pro'?'selected':''}>Pro</option>
+        </select>
+        <button class="btn btn-gold btn-sm" style="margin-left:6px" onclick="applyTier('${b.id}','${b.name}')">Apply</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function applyTier(bizId, name) {
+  const tier = document.getElementById('tier-sel-' + bizId).value;
+  const res = await apiCall('adminSetTier', { biz_id: bizId, tier });
+  if (res.ok) {
+    const b = STATE.allBusinesses.find(b => b.id === bizId);
+    if (b) b.tier = tier;
+    toast(`${name} → ${tier.toUpperCase()} tier applied.`, 'success');
+  } else { toast(res.error, 'error'); }
+}
+
+// ===== SEED DATA =====
+async function seedDemoData() {
+  if (!confirm('Seed demo business data into the Google Sheet? This adds sample businesses.')) return;
+  toast('Seeding data…', 'info');
+  const res = await apiCall('adminSeedData', {});
+  if (res.ok) {
+    toast(`Seeded ${res.businesses_created} businesses! Demo password: ${res.demo_password}`, 'success');
+    loadOverview();
+  } else { toast(res.error || 'Seed failed.', 'error'); }
+}
+
+// ===== HELPERS =====
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', function(e) { if (e.target===this) this.classList.remove('open'); }));
+function capitalize(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ''; }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'}) : '—'; }
+function toast(msg, type='success') {
+  const w = document.getElementById('toastWrap');
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  const d = document.createElement('div');
+  d.className = 'toast ' + (type==='error'?'error':'');
+  d.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  w.appendChild(d);
+  setTimeout(() => { d.style.opacity='0'; d.style.transform='translateY(8px)'; d.style.transition='all 0.3s'; setTimeout(()=>d.remove(),300); }, 3500);
+}
+document.addEventListener('keydown', e => { if (e.key==='Enter' && document.getElementById('adminLogin').style.display!=='none') handleAdminLogin(); });
+</script>
+</body>
+</html>
