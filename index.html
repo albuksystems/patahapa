@@ -286,6 +286,12 @@
     transition: all 0.2s;
   }
   .search-clear:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  #searchBtn {
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px;
+  }
   .search-suggestions {
     position: absolute;
     top: calc(100% + 8px);
@@ -980,10 +986,12 @@
 <div class="search-section">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search products, shops, services…" autocomplete="off">
+    <input type="text" id="searchInput" placeholder="Search products, shops, services…"
+      autocomplete="off" inputmode="search" enterkeyhint="search">
     <button class="search-clear" id="searchClear" onclick="clearSearch()">✕ Clear</button>
     <div class="search-suggestions" id="searchSuggestions"></div>
   </div>
+  <button class="btn btn-primary" id="searchBtn" onclick="runSearch()" style="margin-top:10px;width:100%">🔍 Search</button>
   <div class="search-tags">
     <span class="search-tag" onclick="doSearch('milk')">🥛 Milk</span>
     <span class="search-tag" onclick="doSearch('phones')">📱 Phones</span>
@@ -1228,19 +1236,24 @@ function waURL(p) {
   }
   return 'https://wa.me/' + sellerNum + '?text=' + encodeURIComponent(msg);
 }
-function productCard(p, extraClass='') {
-  const large = p.large ? 'featured-card--large' : '';
-  const dropBadge = p.drop ? '<span class="card-price-drop">-' + p.drop + '</span>' : '';
-  const oldPriceBadge = p.oldPrice ? '<span class="card-price-old">' + p.oldPrice + '</span>' : '';
-  const imgUrl = p.img_url || p.image_url || '';
-  const imgSize = p.large ? '64' : '44';
-  const imgHTML = imgUrl
-    ? '<img class="card-img-photo" src="' + imgUrl + '" alt="' + p.name + '" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">' +
-      '<div class="card-img-overlay"></div>' +
-      '<div class="card-img-bg" style="display:block;background:radial-gradient(circle,rgba(255,255,255,0.06),transparent)">' +
-      '<span style="position:relative;z-index:1;font-size:' + imgSize + 'px">' + (p.emoji||'📦') + '</span></div>'
-    : '<div class="card-img-bg" style="background:radial-gradient(circle,rgba(255,255,255,0.06),transparent)"></div>' +
-      '<span style="position:relative;z-index:1;font-size:' + imgSize + 'px">' + (p.emoji||'📦') + '</span>';
+function productCard(p, extraClass) {
+  extraClass = extraClass || '';
+  var large = p.large ? 'featured-card--large' : '';
+  var dropBadge = p.drop ? '<span class="card-price-drop">-' + p.drop + '</span>' : '';
+  var oldPriceBadge = p.oldPrice ? '<span class="card-price-old">' + p.oldPrice + '</span>' : '';
+  var imgUrl = p.img_url || p.image_url || '';
+  var imgSize = p.large ? '64' : '44';
+  var imgHTML;
+  if (imgUrl) {
+    imgHTML = '<img class="card-img-photo" src="' + imgUrl + '" alt="' + (p.name||'') + '" ' +
+              'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
+              '<div class="card-img-overlay"></div>' +
+              '<div class="card-img-bg" style="display:none;background:radial-gradient(circle,rgba(255,255,255,0.06),transparent)">' +
+              '<span style="position:relative;z-index:1;font-size:' + imgSize + 'px">' + (p.emoji||'📦') + '</span></div>';
+  } else {
+    imgHTML = '<div class="card-img-bg" style="background:radial-gradient(circle,rgba(255,255,255,0.06),transparent)"></div>' +
+              '<span style="position:relative;z-index:1;font-size:' + imgSize + 'px">' + (p.emoji||'📦') + '</span>';
+  }
   return '<div class="featured-card ' + large + ' ' + extraClass + '" onclick="viewShop(' + JSON.stringify(p.id) + ')">' +
     '<div class="card-img">' +
       imgHTML +
@@ -1338,6 +1351,20 @@ const searchSugg = document.getElementById('searchSuggestions');
 const searchResults = document.getElementById('searchResults');
 const mainContent = document.getElementById('mainContent');
 
+// Run search immediately — called by button and Enter key
+function runSearch() {
+  var q = searchInput.value.trim();
+  if (q) doSearch(q);
+}
+
+// Enter key on mobile keyboard
+searchInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' || e.keyCode === 13) {
+    e.preventDefault();
+    runSearch();
+  }
+});
+
 searchInput.addEventListener('input', function() {
   var q = this.value.trim();
   document.getElementById('searchClear').style.display = q ? 'block' : 'none';
@@ -1367,18 +1394,24 @@ searchInput.addEventListener('input', function() {
 async function doSearch(q) {
   q = (q || '').trim();
   if (!q) return;
+  // Dismiss mobile keyboard
+  searchInput.blur();
   searchInput.value = q;
-  searchSugg.style.display = 'none';
-  document.getElementById('searchClear').style.display = 'block';
-  document.getElementById('searchQueryLabel').textContent = '"' + q + '"';
-  document.getElementById('resultsCount').textContent = 'Searching…';
-  document.getElementById('resultsGrid').innerHTML =
+  if (searchSugg) searchSugg.style.display = 'none';
+  var clearBtn = document.getElementById('searchClear');
+  if (clearBtn) clearBtn.style.display = 'block';
+  var queryLabel = document.getElementById('searchQueryLabel');
+  var countLabel = document.getElementById('resultsCount');
+  var grid = document.getElementById('resultsGrid');
+  if (queryLabel) queryLabel.textContent = '"' + q + '"';
+  if (countLabel) countLabel.textContent = 'Searching...';
+  if (grid) grid.innerHTML =
     '<div style="grid-column:1/-1;text-align:center;padding:40px">' +
     '<div class="spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px"></div>' +
-    '<div style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">Searching corridor…</div></div>';
-  searchResults.style.display = 'block';
-  mainContent.classList.add('hidden');
-  window.scrollTo({ top: 140, behavior: 'smooth' });
+    '<div style="font-size:13px;color:var(--text-muted)">Finding results...</div></div>';
+  if (searchResults) searchResults.style.display = 'block';
+  if (mainContent) mainContent.classList.add('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   // Log search event
   apiFetch('logEvent', { event_type: 'search', query: q });
@@ -1386,13 +1419,16 @@ async function doSearch(q) {
   // Try live API first
   var res = await apiFetch('search', { q: q, limit: 30 });
   if (res.ok && res.results && res.results.length > 0) {
-    document.getElementById('resultsCount').textContent =
-      res.count + ' result' + (res.count !== 1 ? 's' : '') + ' found';
-    document.getElementById('resultsGrid').innerHTML =
-      res.results.map(function(p) { return productCard(apiProductToCard(p)); }).join('');
+    if (countLabel) countLabel.textContent = res.count + ' result' + (res.count !== 1 ? 's' : '') + ' found';
+    var cards = '';
+    res.results.forEach(function(p) {
+      try { cards += productCard(apiProductToCard(p)); }
+      catch(e) { console.error('Card error:', e, p); }
+    });
+    if (grid) grid.innerHTML = cards || '<div style="padding:40px;text-align:center;color:var(--text-muted)">Could not render results.</div>';
   } else if (res.ok && res.count === 0) {
-    document.getElementById('resultsCount').textContent = '0 results';
-    document.getElementById('resultsGrid').innerHTML =
+    if (countLabel) countLabel.textContent = '0 results';
+    if (grid) grid.innerHTML =
       '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text-muted);font-family:var(--font-mono)">' +
       'No results for "' + q + '"<br>' +
       '<span style="font-size:13px;margin-top:8px;display:block">Try: milk, phones, beauty, uniforms, electronics</span></div>';
@@ -1403,9 +1439,8 @@ async function doSearch(q) {
              p.category.toLowerCase().includes(q.toLowerCase()) ||
              (p.desc||'').toLowerCase().includes(q.toLowerCase());
     });
-    document.getElementById('resultsCount').textContent =
-      matches.length + ' result' + (matches.length !== 1 ? 's' : '');
-    document.getElementById('resultsGrid').innerHTML = matches.length
+    if (countLabel) countLabel.textContent = matches.length + ' result' + (matches.length !== 1 ? 's' : '');
+    if (grid) grid.innerHTML = matches.length
       ? matches.map(function(p) { return productCard(p); }).join('')
       : '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text-muted)">' +
         'No results for "' + q + '"</div>';
