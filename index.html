@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corridor Market — Mlolongo · Syokimau · Athi River · Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111114;
+    --surface2: #18181d;
+    --border: rgba(255,255,255,0.07);
+    --border-hot: rgba(255,80,40,0.35);
+    --text: #f0ede8;
+    --text-muted: #6b6875;
+    --text-dim: #9d99a8;
+    --accent: #ff5c1a;
+    --accent2: #ffc94a;
+    --accent3: #4affb4;
+    --mlolongo: #ff5c1a;
+    --syokimau: #a78bfa;
+    --athiriver: #4affb4;
+    --pipeline: #ffc94a;
+    --hot: #ff2d55;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== NOISE OVERLAY ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.6;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  /* ===== HEADER / NAV ===== */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10,10,11,0.82);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-head);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-logo .dot { 
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,92,26,0.7); }
+    50% { box-shadow: 0 0 0 6px rgba(255,92,26,0); }
+  }
+  .nav-corridors {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .corridor-pill {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    background: transparent;
+  }
+  .corridor-pill.mlo { color: var(--mlolongo); border-color: rgba(255,92,26,0.3); }
+  .corridor-pill.syo { color: var(--syokimau); border-color: rgba(167,139,250,0.3); }
+  .corridor-pill.ath { color: var(--athiriver); border-color: rgba(74,255,180,0.3); }
+  .corridor-pill.pip { color: var(--pipeline); border-color: rgba(255,201,74,0.3); }
+  .corridor-pill:hover { background: rgba(255,255,255,0.05); transform: translateY(-1px); }
+  .nav-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-nav {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-nav:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .btn-nav.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+  .btn-nav.primary:hover { background: #e04810; }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding: 130px 24px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .hero-glow {
+    position: absolute;
+    top: 80px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(255,92,26,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+  .hero-title {
+    font-family: var(--font-head);
+    font-size: clamp(38px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+  }
+  .hero-title .line2 { color: var(--accent2); }
+  .hero-subtitle {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 36px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-num {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -1px;
+  }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s;
+    text-decoration: none;
+    font-family: var(--font-body);
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #e04810; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(255,92,26,0.35); }
+  .btn-whatsapp { background: #25D366; color: white; }
+  .btn-whatsapp:hover { background: #1db954; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(37,211,102,0.3); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--text); background: var(--surface); }
+
+  /* ===== SEARCH BAR ===== */
+  .search-section {
+    padding: 0 24px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .search-wrap {
+    position: relative;
+    max-width: 680px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 18px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+    pointer-events: none;
+  }
+  #searchInput {
+    width: 100%;
+    padding: 16px 20px 16px 50px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: var(--font-body);
+    outline: none;
+    transition: all 0.25s;
+  }
+  #searchInput:focus {
+    border-color: rgba(255,92,26,0.5);
+    box-shadow: 0 0 0 3px rgba(255,92,26,0.08), 0 8px 30px rgba(0,0,0,0.3);
+    background: #1a1a20;
+  }
+  #searchInput::placeholder { color: var(--text-muted); }
+  .search-clear {
+    position: absolute;
+    right: 16px; top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+    font-family: var(--font-mono);
+    transition: all 0.2s;
+  }
+  .search-clear:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  #searchBtn {
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px;
+  }
+  .search-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0; right: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+    z-index: 50;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .suggestion-item {
+    padding: 12px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .suggestion-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  .suggestion-item .sug-icon { font-size: 16px; }
+  .search-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .search-tag {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .search-tag:hover {
+    background: rgba(255,92,26,0.1);
+    border-color: rgba(255,92,26,0.3);
+    color: var(--accent);
+  }
+
+  /* ===== SECTION LAYOUT ===== */
+  .section {
+    padding: 0 24px 64px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 12px;
+  }
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  .badge-hot { background: rgba(255,45,85,0.15); color: var(--hot); border: 1px solid rgba(255,45,85,0.2); }
+  .badge-live { background: rgba(74,255,180,0.1); color: var(--accent3); border: 1px solid rgba(74,255,180,0.2); }
+  .badge-new { background: rgba(255,201,74,0.1); color: var(--accent2); border: 1px solid rgba(255,201,74,0.2); }
+  .section-link {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+  .section-link:hover { color: var(--accent); }
+
+  /* ===== FEATURED GRID ===== */
+  .featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .featured-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: card-in 0.5s ease both;
+    position: relative;
+  }
+  .featured-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255,255,255,0.14);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,92,26,0.1);
+  }
+  .featured-card.featured-card--large {
+    grid-column: span 2;
+  }
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card-img {
+    height: 180px;
+    background: var(--surface2);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+  }
+  .featured-card--large .card-img { height: 240px; }
+  /* Product image in card */
+  .card-img-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .featured-card:hover .card-img-photo { transform: scale(1.05); }
+  .card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .card-img-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    transition: opacity 0.3s, transform 0.5s;
+  }
+  .featured-card:hover .card-img-bg { opacity: 0.25; transform: scale(1.05); }
+  .card-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(8px);
+  }
+  .badge-sponsored {
+    background: rgba(255,201,74,0.2);
+    border: 1px solid rgba(255,201,74,0.35);
+    color: var(--accent2);
+  }
+  .badge-trending {
+    background: rgba(255,45,85,0.2);
+    border: 1px solid rgba(255,45,85,0.35);
+    color: var(--hot);
+  }
+  .badge-verified {
+    background: rgba(74,255,180,0.15);
+    border: 1px solid rgba(74,255,180,0.3);
+    color: var(--accent3);
+  }
+  .card-corridor-dot {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .dot-mlo { background: rgba(255,92,26,0.25); color: var(--mlolongo); }
+  .dot-syo { background: rgba(167,139,250,0.2); color: var(--syokimau); }
+  .dot-ath { background: rgba(74,255,180,0.15); color: var(--athiriver); }
+  .dot-pip { background: rgba(255,201,74,0.15); color: var(--pipeline); }
+  .card-body { padding: 16px; }
+  .card-category {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .card-name {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .card-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .card-price {
+    font-family: var(--font-mono);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--accent2);
+  }
+  .card-price-old {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: line-through;
+    margin-left: 6px;
+  }
+  .card-price-drop {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: rgba(255,45,85,0.15);
+    color: var(--hot);
+    border: 1px solid rgba(255,45,85,0.2);
+    border-radius: 4px;
+    padding: 2px 7px;
+  }
+  .card-actions { display: flex; gap: 8px; }
+  .card-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .card-btn-wa { background: #25D366; color: white; }
+  .card-btn-wa:hover { background: #1db954; }
+  .card-btn-shop {
+    background: var(--surface2);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .card-btn-shop:hover { background: rgba(255,255,255,0.05); color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+  /* ===== TICKER / TRENDING ===== */
+  .ticker-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border-hot);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .ticker-label {
+    background: var(--hot);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    padding: 10px 14px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ticker-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: white;
+    animation: blink 1s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .ticker-track {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .ticker-inner {
+    display: flex;
+    gap: 32px;
+    animation: ticker 28s linear infinite;
+    white-space: nowrap;
+    padding: 10px 16px;
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .ticker-item .ti-emoji { font-size: 15px; }
+  .ticker-item strong { color: var(--text); }
+  .ticker-item .ti-price { color: var(--accent2); font-family: var(--font-mono); font-size: 12px; }
+  .ticker-item .ti-sep { color: var(--border); margin: 0 8px; }
+
+  /* ===== TRENDING CAROUSEL ===== */
+  .trending-scroll {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .trending-scroll::-webkit-scrollbar { display: none; }
+  .trending-card {
+    min-width: 220px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.25s;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    animation: card-in 0.4s ease both;
+  }
+  .trending-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--hot), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .trending-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,45,85,0.25);
+  }
+  .trending-card:hover::before { opacity: 1; }
+  .trending-rank {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .trending-rank .rank-num {
+    font-size: 24px;
+    font-weight: 700;
+    font-family: var(--font-head);
+    color: rgba(255,255,255,0.08);
+    line-height: 1;
+  }
+  .trending-emoji { font-size: 32px; margin-bottom: 10px; display: block; }
+  .trending-name {
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .trending-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .trending-bar {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .trending-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--hot), var(--accent));
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  /* ===== HIGHLY SEARCHED ===== */
+  .search-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .search-cloud-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .search-cloud-item:hover {
+    background: rgba(255,92,26,0.08);
+    border-color: rgba(255,92,26,0.3);
+    color: var(--text);
+    transform: scale(1.04);
+  }
+  .search-cloud-item .sci-count {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+  }
+  .search-cloud-item.big { font-size: 15px; padding: 11px 20px; }
+  .search-cloud-item.medium { font-size: 14px; }
+
+  /* ===== CORRIDOR SECTIONS ===== */
+  .corridor-section { margin-bottom: 56px; }
+  .corridor-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    border: 1px solid;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+  }
+  .corridor-header.mlo { border-color: rgba(255,92,26,0.2); }
+  .corridor-header.syo { border-color: rgba(167,139,250,0.2); }
+  .corridor-header.ath { border-color: rgba(74,255,180,0.2); }
+  .corridor-header.pip { border-color: rgba(255,201,74,0.2); }
+  .corridor-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .ci-mlo { background: rgba(255,92,26,0.15); }
+  .ci-syo { background: rgba(167,139,250,0.15); }
+  .ci-ath { background: rgba(74,255,180,0.1); }
+  .ci-pip { background: rgba(255,201,74,0.1); }
+  .corridor-info h3 {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .corridor-info p {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  .corridor-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+  .corridor-count strong {
+    display: block;
+    font-size: 22px;
+    font-family: var(--font-head);
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .corridor-count.c-mlo strong { color: var(--mlolongo); }
+  .corridor-count.c-syo strong { color: var(--syokimau); }
+  .corridor-count.c-ath strong { color: var(--athiriver); }
+  .corridor-count.c-pip strong { color: var(--pipeline); }
+
+  /* ===== SEARCH RESULTS ===== */
+  #searchResults {
+    display: none;
+    padding: 0 24px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .results-title {
+    font-family: var(--font-head);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .results-title .q {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .results-count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: normal;
+    font-weight: 400;
+  }
+  #mainContent { transition: opacity 0.3s; }
+  #mainContent.hidden { display: none; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    gap: 16px;
+  }
+  .footer-brand {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+  .footer-brand span { color: var(--accent); }
+  .footer-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+  .footer-corridors {
+    display: flex;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .footer-corridors span { cursor: pointer; transition: color 0.2s; }
+  .footer-corridors span:hover { color: var(--text); }
+  .fc-mlo { color: var(--mlolongo); }
+  .fc-syo { color: var(--syokimau); }
+  .fc-ath { color: var(--athiriver); }
+  .fc-pip { color: var(--pipeline); }
+
+  /* ===== FLOAT WA BUTTON ===== */
+  .float-wa {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    width: 56px; height: 56px;
+    background: #25D366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(37,211,102,0.4);
+    transition: all 0.3s;
+    z-index: 200;
+    text-decoration: none;
+    animation: float-in 0.5s 0.8s ease both;
+  }
+  @keyframes float-in { from { opacity:0; transform: scale(0.5); } to { opacity:1; transform: scale(1); } }
+  .float-wa:hover { transform: scale(1.12); box-shadow: 0 12px 40px rgba(37,211,102,0.5); }
+  .float-wa-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #25D366;
+    animation: wa-pulse 2.5s ease-in-out infinite;
+    z-index: -1;
+  }
+  @keyframes wa-pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.7); opacity: 0; }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .nav-corridors { display: none; }
+    .featured-card.featured-card--large { grid-column: span 1; }
+    .hero-stats { gap: 24px; }
+    .footer { flex-direction: column; text-align: center; }
+    .footer-meta { text-align: center; }
+  }
+  @media (max-width: 480px) {
+    .hero { padding: 110px 16px 40px; }
+    .section, .search-section, #searchResults { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-logo" href="#">
+    <span class="dot"></span>
+    Corridor<span>Market</span>
+  </a>
+  <div class="nav-corridors">
+    <a class="corridor-pill mlo" href="#mlolongo">Mlolongo</a>
+    <a class="corridor-pill syo" href="#syokimau">Syokimau</a>
+    <a class="corridor-pill ath" href="#athiriver">Athi River</a>
+    <a class="corridor-pill pip" href="#pipeline">Pipeline</a>
+  </div>
+  <div class="nav-actions">
+    <a class="btn-nav" href="business.html">Business Login</a>
+    <a class="btn-nav primary" href="business.html?action=register">List Your Shop</a>
+  </div>
+</nav>
+
+<!-- FLOAT WHATSAPP -->
+<a class="float-wa" href="https://wa.me/254768789382?text=Hi%20Pata%20Hapa%2C%20I%20found%20you%20on%20patahapa.co.ke!" target="_blank">
+  <div class="float-wa-pulse"></div>
+  📲
+</a>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">Live Marketplace</div>
+  <h1 class="hero-title">
+    Shop the Corridor.<br>
+    <span class="line2">Find it. Order it.</span>
+  </h1>
+  <p class="hero-subtitle">
+    Businesses from Mlolongo, Syokimau, Athi River & Pipeline — all in one place.
+    Browse promos, message sellers directly on WhatsApp, and support your corridor.
+  </p>
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num" id="statBiz">—</span>
+      <span class="stat-label">Businesses</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="statProds">—</span>
+      <span class="stat-label">Products &amp; Services</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="statCorr">—</span>
+      <span class="stat-label">Active Corridors</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">WhatsApp</span>
+      <span class="stat-label">Direct Orders</span>
+    </div>
+  </div>
+  <div class="hero-ctas">
+    <button class="btn btn-primary" onclick="document.getElementById('searchInput').focus()">🔍 Browse Products</button>
+    <a class="btn btn-whatsapp" href="https://wa.me/254768789382?text=Hi%20Pata%20Hapa%2C%20I%20need%20help%20finding%20a%20product." target="_blank">📲 WhatsApp Us</a>
+    <a class="btn btn-ghost" href="business.html">For Businesses →</a>
+  </div>
+  <div style="margin-top:16px">
+    <a class="btn btn-whatsapp" href="https://wa.me/254768789382?text=Hi%21+I+want+to+list+my+business+FREE+on+Pata+Hapa+%F0%9F%9B%8D" target="_blank" style="display:inline-flex;gap:8px;font-size:14px;padding:11px 20px;border-radius:10px;background:#25D366;color:#000;font-weight:700;text-decoration:none">
+      📲 List Your Business — FREE
+    </a>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search products, shops, services…"
+      autocomplete="off" inputmode="search" enterkeyhint="search">
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕ Clear</button>
+    <div class="search-suggestions" id="searchSuggestions"></div>
+  </div>
+  <button class="btn btn-primary" id="searchBtn" onclick="runSearch()" style="margin-top:10px;width:100%">🔍 Search</button>
+  <div class="search-tags">
+    <span class="search-tag" onclick="doSearch('milk')">🥛 Milk</span>
+    <span class="search-tag" onclick="doSearch('phones')">📱 Phones</span>
+    <span class="search-tag" onclick="doSearch('uniforms')">👕 Uniforms</span>
+    <span class="search-tag" onclick="doSearch('clothing')">👗 Clothing</span>
+    <span class="search-tag" onclick="doSearch('gas')">🔥 Gas Refill</span>
+    <span class="search-tag" onclick="doSearch('blenders')">🌀 Blenders</span>
+    <span class="search-tag" onclick="doSearch('beauty')">💄 Beauty</span>
+    <span class="search-tag" onclick="doSearch('electronics')">🔌 Electronics</span>
+    <span class="search-tag" onclick="doSearch('food')">🍱 Food</span>
+    <span class="search-tag" onclick="doSearch('hardware')">🔧 Hardware</span>
+  </div>
+</div>
+
+<!-- SEARCH RESULTS (hidden by default) -->
+<div id="searchResults">
+  <div class="results-title">Results for <span class="q" id="searchQueryLabel"></span> <span class="results-count" id="resultsCount"></span></div>
+  <div class="featured-grid" id="resultsGrid"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent">
+
+  <!-- TICKER -->
+  <div class="section" style="padding-bottom:28px;">
+    <div class="ticker-wrap">
+      <div class="ticker-label">🔴 LIVE PROMOS</div>
+      <div class="ticker-track">
+        <div class="ticker-inner" id="tickerInner">
+          <!-- Duplicated for infinite scroll -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED ITEMS -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">
+        ✨ Featured Items
+        <span class="section-badge badge-new">SPONSORED</span>
+      </div>
+      <a class="section-link" href="#">View all →</a>
+    </div>
+    <div class="featured-grid" id="featuredGrid"></div>
+  </div>
+
+  <!-- TRENDING NOW -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">
+        🔥 Trending Now
+        <span class="section-badge badge-hot">HOT</span>
+      </div>
+      <a class="section-link" href="#">See rankings →</a>
+    </div>
+    <div class="ticker-wrap" style="margin-bottom:20px;">
+      <div class="ticker-label">TRENDING</div>
+      <div class="ticker-track">
+        <div class="ticker-inner" id="trendingTicker"></div>
+      </div>
+    </div>
+    <div class="trending-scroll" id="trendingScroll"></div>
+  </div>
+
+  <!-- HIGHLY SEARCHED -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">
+        📊 Highly Searched
+        <span class="section-badge badge-live">LIVE DATA</span>
+      </div>
+    </div>
+    <div class="search-cloud" id="searchCloud"></div>
+  </div>
+
+  <!-- CORRIDOR: MLOLONGO -->
+  <div class="section corridor-section" id="mlolongo">
+    <div class="corridor-header mlo">
+      <div class="corridor-icon ci-mlo">🏪</div>
+      <div class="corridor-info">
+        <h3 style="color:var(--mlolongo)">Mlolongo</h3>
+        <p>Main Road · Near KPC · Cabanas Area</p>
+      </div>
+      <div class="corridor-count c-mlo"><strong id="mloCount">18</strong>shops</div>
+    </div>
+    <div class="featured-grid" id="mloGrid"></div>
+  </div>
+
+  <!-- CORRIDOR: SYOKIMAU -->
+  <div class="section corridor-section" id="syokimau">
+    <div class="corridor-header syo">
+      <div class="corridor-icon ci-syo">🌆</div>
+      <div class="corridor-info">
+        <h3 style="color:var(--syokimau)">Syokimau</h3>
+        <p>SGR Side · Katani Road · Mlolongo–Syokimau Link</p>
+      </div>
+      <div class="corridor-count c-syo"><strong id="syoCount">12</strong>shops</div>
+    </div>
+    <div class="featured-grid" id="syoGrid"></div>
+  </div>
+
+  <!-- CORRIDOR: ATHI RIVER -->
+  <div class="section corridor-section" id="athiriver">
+    <div class="corridor-header ath">
+      <div class="corridor-icon ci-ath">🏭</div>
+      <div class="corridor-info">
+        <h3 style="color:var(--athiriver)">Athi River</h3>
+        <p>Mavoko · EPZ · Athi River Town Center</p>
+      </div>
+      <div class="corridor-count c-ath"><strong id="athCount">11</strong>shops</div>
+    </div>
+    <div class="featured-grid" id="athGrid"></div>
+  </div>
+
+  <!-- CORRIDOR: PIPELINE -->
+  <div class="section corridor-section" id="pipeline">
+    <div class="corridor-header pip">
+      <div class="corridor-icon ci-pip">🏘️</div>
+      <div class="corridor-info">
+        <h3 style="color:var(--pipeline)">Pipeline</h3>
+        <p>Pipeline Estate · Embakasi South Corridor</p>
+      </div>
+      <div class="corridor-count c-pip"><strong id="pipCount">7</strong>shops</div>
+    </div>
+    <div class="featured-grid" id="pipGrid"></div>
+  </div>
+
+</div><!-- /mainContent -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer">
+    <div class="footer-brand">Corridor<span>Market</span></div>
+    <div class="footer-corridors">
+      <span class="fc-mlo">Mlolongo</span>
+      <span class="fc-syo">Syokimau</span>
+      <span class="fc-ath">Athi River</span>
+      <span class="fc-pip">Pipeline</span>
+    </div>
+    <div class="footer-meta">
+      Powered by <strong>Albuk Global</strong><br>
+      WhatsApp-First Marketplace
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===== PATA HAPA v3 — LIVE API =====
+const API_BASE = 'https://script.google.com/macros/s/AKfycbwra9DXGxd-SuShQ23yHXsEih5ORHiKTiGcpoH30y92s0EuPjs51P_YWjC9JBa9Oem0fw/exec';
+
+async function apiFetch(action, params={}) {
+  try {
+    const qs = new URLSearchParams({action, ...params}).toString();
+    const res = await fetch(API_BASE + '?' + qs);
+    return await res.json();
+  } catch(e) {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+// ===== STATIC FALLBACK DATA (shown while API loads or if sheet is empty) =====
+const PRODUCTS = [
+  // MLOLONGO
+  { id:1, name:"Vision Electronics", category:"Electronics", desc:"Phones, TVs, accessories & repairs. Largest electronics in the corridor.", price:"KES 2,500", oldPrice:"KES 3,200", drop:"22%", emoji:"📱", corridor:"mlo", badge:"sponsored", biz_wa:"254700000001", waMsg:"Hi Vision Electronics, I found you on Pata Hapa! I am interested in your phones.", featured:true, large:true, searches:320, hot:true },
+  { id:2, name:"Kabbo Shop", category:"General Retail", desc:"Household goods, groceries, stationery & daily essentials.", price:"KES 50+", emoji:"🏪", corridor:"mlo", badge:"verified", biz_wa:"254108024017", waMsg:"Hi Kabbo Shop, I found you on Pata Hapa!", featured:true, searches:180 },
+  { id:3, name:"Liberty Beauty Hub", category:"Beauty & Cosmetics", desc:"Hair products, skincare, wigs, and beauty supplies.", price:"KES 300", oldPrice:"KES 450", drop:"33%", emoji:"💄", corridor:"mlo", badge:"trending", waMsg:"Hi Liberty, saw your promo on Corridor Market!", featured:true, searches:290, hot:true },
+  { id:4, name:"Ramina Snacks", category:"Food & Snacks", desc:"Fresh mandazi, samosas, juice & light meals daily.", price:"KES 20", emoji:"🍱", corridor:"mlo", searches:110 },
+  { id:5, name:"Gezba Kinyozi", category:"Barber Shop", desc:"Fades, shaves, edge-ups. Walk-in welcome.", price:"KES 200", oldPrice:"KES 300", drop:"33%", emoji:"✂️", corridor:"mlo", badge:"trending", waMsg:"Gezba Kinyozi — I saw your deal on Corridor Market!", featured:false, searches:95, hot:true },
+  { id:6, name:"Gas Refill Mlolongo", category:"Gas & Energy", desc:"6kg, 13kg Pro-gas refills. Free delivery nearby.", price:"KES 1,450", emoji:"🔥", corridor:"mlo", searches:205 },
+
+  // SYOKIMAU
+  { id:7, name:"Konnect Group", category:"Tech & Printing", desc:"Branding, printing, social media management & digital services.", price:"KES 3,500", emoji:"🖨️", corridor:"syo", badge:"sponsored", waMsg:"Hi Konnect Group, I found you on Corridor Market.", featured:true, large:true, searches:140 },
+  { id:8, name:"Jamel Cosmetics", category:"Beauty & Cosmetics", desc:"Imported cosmetics, skincare & fragrances.", price:"KES 850", oldPrice:"KES 1,200", drop:"29%", emoji:"🌸", corridor:"syo", badge:"trending", waMsg:"Jamel Cosmetics — Corridor Market inquiry!", featured:true, searches:175, hot:true },
+  { id:9, name:"Syokimau Uniforms", category:"Clothing & Uniforms", desc:"School uniforms, workwear, corporate branding.", price:"KES 1,800", emoji:"👕", corridor:"syo", searches:380 },
+  { id:10, name:"Fana & Nana Invest", category:"Financial Services", desc:"Chamas, investments, insurance & savings groups.", price:"Consult", emoji:"📈", corridor:"syo", searches:60 },
+
+  // ATHI RIVER
+  { id:11, name:"Royal Beauty Hub", category:"Beauty & Salon", desc:"Full salon — hair, nails, lashes, and threading.", price:"KES 500", oldPrice:"KES 800", drop:"37%", emoji:"👑", corridor:"ath", badge:"trending", waMsg:"Royal Beauty Hub — from Corridor Market!", featured:true, searches:220, hot:true },
+  { id:12, name:"Diamond Uniforms", category:"Clothing & Uniforms", desc:"School & corporate uniforms. Bulk orders welcome.", price:"KES 2,200", emoji:"🎓", corridor:"ath", badge:"verified", searches:310 },
+  { id:13, name:"Mavoko Hardware", category:"Hardware & Building", desc:"Cement, steel, tiles, paint — all building supplies.", price:"KES 650/bag", emoji:"🔨", corridor:"ath", searches:155 },
+  { id:14, name:"Athi Milk Depot", category:"Dairy & Fresh", desc:"Fresh milk daily. 500ml, 1L, 2L available. M-Pesa accepted.", price:"KES 65/L", emoji:"🥛", corridor:"ath", searches:420 },
+
+  // PIPELINE
+  { id:15, name:"Hapii Products", category:"FMCG & Wholesale", desc:"Cleaning agents, soaps, household products — wholesale & retail.", price:"KES 150", oldPrice:"KES 220", drop:"32%", emoji:"🧴", corridor:"pip", badge:"sponsored", waMsg:"Hi Hapii Products, I found you on Corridor Market.", featured:true, large:true, searches:130, hot:true },
+  { id:16, name:"Pipeline Blenders", category:"Electronics & Appliances", desc:"Blenders, juicers, kettles & small kitchen appliances.", price:"KES 1,800", emoji:"🌀", corridor:"pip", searches:195 },
+  { id:17, name:"Panaki Restaurant", category:"Restaurant & Bar", desc:"Nyama choma, ugali, fresh juices. Dine-in & takeaway.", price:"KES 350", emoji:"🍖", corridor:"pip", waMsg:"Panaki — ordering from Corridor Market!", searches:165 },
+  { id:18, name:"Pipeline Phones", category:"Electronics", desc:"New & refurbished smartphones. IMEI guaranteed.", price:"KES 6,500", emoji:"📲", corridor:"pip", badge:"verified", searches:280 },
+];
+
+const TRENDING_SEARCHES = [
+  { term:"Milk", count:"420 searches", emoji:"🥛", size:"big" },
+  { term:"Phones", count:"360 searches", emoji:"📱", size:"big" },
+  { term:"Uniforms", count:"310 searches", emoji:"👕", size:"medium" },
+  { term:"Clothing", count:"290 searches", emoji:"👗", size:"medium" },
+  { term:"Gas refill", count:"205 searches", emoji:"🔥", size:"medium" },
+  { term:"Blenders", count:"195 searches", emoji:"🌀", size:"medium" },
+  { term:"Barber", count:"175 searches", emoji:"✂️", size:"" },
+  { term:"Beauty salon", count:"160 searches", emoji:"💅", size:"medium" },
+  { term:"Food near me", count:"150 searches", emoji:"🍱", size:"" },
+  { term:"Wholesale", count:"130 searches", emoji:"📦", size:"" },
+  { term:"Electronics", count:"115 searches", emoji:"🔌", size:"" },
+  { term:"Printing", count:"95 searches", emoji:"🖨️", size:"" },
+  { term:"Hardware", count:"85 searches", emoji:"🔧", size:"" },
+];
+
+const TICKER_PROMOS = [
+  { emoji:"📱", biz:"Vision Electronics", text:"Tecno Spark 20 now", price:"KES 14,500" },
+  { emoji:"💄", biz:"Liberty Beauty Hub", text:"Wigs from", price:"KES 1,800" },
+  { emoji:"🥛", biz:"Athi Milk Depot", text:"Fresh milk daily", price:"KES 65/L" },
+  { emoji:"🔥", biz:"Gas Refill Mlolongo", text:"Pro-Gas 13kg", price:"KES 1,450" },
+  { emoji:"✂️", biz:"Gezba Kinyozi", text:"Full cut + shave", price:"KES 200" },
+  { emoji:"👕", biz:"Diamond Uniforms", text:"School sets from", price:"KES 2,200" },
+  { emoji:"🌀", biz:"Pipeline Blenders", text:"Blender special", price:"KES 1,800" },
+  { emoji:"🧴", biz:"Hapii Products", text:"Bulk soap discount", price:"KES 150" },
+  { emoji:"👑", biz:"Royal Beauty Hub", text:"Full makeover", price:"KES 500" },
+  { emoji:"📲", biz:"Pipeline Phones", text:"Samsung A15", price:"KES 18,500" },
+];
+
+// ===== RENDER HELPERS =====
+function corridorClass(c) {
+  return { mlo:'dot-mlo', syo:'dot-syo', ath:'dot-ath', pip:'dot-pip' }[c] || '';
+}
+function corridorLabel(c) {
+  return { mlo:'MLO', syo:'SYO', ath:'ATH', pip:'PIP' }[c] || c.toUpperCase();
+}
+function badgeHTML(badge) {
+  if (!badge) return '';
+  const map = { sponsored:'badge-sponsored', trending:'badge-trending', verified:'badge-verified' };
+  const label = { sponsored:'⭐ SPONSORED', trending:'🔥 TRENDING', verified:'✅ VERIFIED' };
+  return '<div class="card-badge ' + (map[badge]||'') + '">' + (label[badge]||badge) + '</div>';
+}
+function waURL(p) {
+  var sellerNum = String(p.biz_wa || p.wa || '').trim().replace(/[^0-9]/g, '');
+  if (sellerNum.length === 9) sellerNum = '254' + sellerNum;
+  else if (sellerNum.length === 10 && (sellerNum.startsWith('07') || sellerNum.startsWith('01'))) sellerNum = '254' + sellerNum.slice(1);
+  else if (sellerNum.length === 9 && sellerNum.startsWith('1')) sellerNum = '2540' + sellerNum;
+  var msg = p.waMsg || ('Hi ' + (p.name||'') + ', I found you on Pata Hapa (patahapa.co.ke). Interested in: ' + (p.desc||p.name||'your products'));
+  if (!sellerNum || sellerNum.length < 10) {
+    // No valid number — open WA without number
+    return 'https://wa.me/?text=' + encodeURIComponent(msg);
+  }
+  return 'https://wa.me/' + sellerNum + '?text=' + encodeURIComponent(msg);
+}
+function productCard(p, extraClass) {
+  extraClass = extraClass || '';
+  var large = p.large ? 'featured-card--large' : '';
+  var dropBadge = p.drop ? '<span class="card-price-drop">-' + p.drop + '</span>' : '';
+  var oldPriceBadge = p.oldPrice ? '<span class="card-price-old">' + p.oldPrice + '</span>' : '';
+  var imgUrl = p.img_url || p.image_url || '';
+  var imgSize = p.large ? '64' : '44';
+  var imgHTML;
+  if (imgUrl) {
+    imgHTML = '<img class="card-img-photo" src="' + imgUrl + '" alt="' + (p.name||'') + '" ' +
+              'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
+              '<div class="card-img-overlay"></div>' +
+              '<div class="card-img-bg" style="display:none;background:radial-gradient(circle,rgba(255,255,255,0.06),transparent)">' +
+              '<span style="position:relative;z-index:1;font-size:' + imgSize + 'px">' + (p.emoji||'📦') + '</span></div>';
+  } else {
+    imgHTML = '<div class="card-img-bg" style="background:radial-gradient(circle,rgba(255,255,255,0.06),transparent)"></div>' +
+              '<span style="position:relative;z-index:1;font-size:' + imgSize + 'px">' + (p.emoji||'📦') + '</span>';
+  }
+  return '<div class="featured-card ' + large + ' ' + extraClass + '" onclick="viewShop(' + JSON.stringify(p.id) + ')">' +
+    '<div class="card-img">' +
+      imgHTML +
+      badgeHTML(p.badge) +
+      '<div class="card-corridor-dot ' + corridorClass(p.corridor) + '">' + corridorLabel(p.corridor) + '</div>' +
+    '</div>' +
+    '<div class="card-body">' +
+      '<div class="card-category">' + (p.category||'') + '</div>' +
+      '<div class="card-name">' + (p.name||'') + '</div>' +
+      '<div class="card-desc">' + (p.desc||p.description||'') + '</div>' +
+      '<div class="card-price-row">' +
+        '<div><span class="card-price">' + (p.price||'') + '</span>' + oldPriceBadge + '</div>' +
+        dropBadge +
+      '</div>' +
+      '<div class="card-actions">' +
+        '<a class="card-btn card-btn-wa" href="' + waURL(p) + '" target="_blank" onclick="event.stopPropagation()">📲 WhatsApp</a>' +
+        '<button class="card-btn card-btn-shop" onclick="event.stopPropagation();viewShop(' + JSON.stringify(p.id) + ')">View Shop →</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ===== RENDER SECTIONS =====
+function renderFeatured() {
+  const featured = PRODUCTS.filter(p => p.featured);
+  document.getElementById('featuredGrid').innerHTML = featured.map(p => productCard(p)).join('');
+}
+
+function renderCorridors() {
+  const corridors = ['mlo','syo','ath','pip'];
+  const gridIds = { mlo:'mloGrid', syo:'syoGrid', ath:'athGrid', pip:'pipGrid' };
+  const countIds = { mlo:'mloCount', syo:'syoCount', ath:'athCount', pip:'pipCount' };
+  corridors.forEach(c => {
+    const items = PRODUCTS.filter(p => p.corridor === c);
+    document.getElementById(gridIds[c]).innerHTML = items.map(p => productCard(p)).join('');
+    document.getElementById(countIds[c]).textContent = items.length;
+  });
+}
+
+function renderTrending() {
+  const hotProducts = PRODUCTS.filter(p => p.hot).sort((a,b) => b.searches - a.searches);
+  const scroll = document.getElementById('trendingScroll');
+  scroll.innerHTML = hotProducts.map(function(p, i) {
+    var pct = Math.round(((p.searches||0) / 450) * 100);
+    return '<div class="trending-card" onclick="viewShop(' + JSON.stringify(p.id) + ')" style="animation-delay:' + (i*0.07) + 's">' +
+      '<div class="trending-rank"><span class="rank-num">' + String(i+1).padStart(2,'0') + '</span><span>🔥 HOT</span></div>' +
+      '<span class="trending-emoji">' + (p.emoji||'📦') + '</span>' +
+      '<div class="trending-name">' + p.name + '</div>' +
+      '<div class="trending-meta">' + (p.searches||0) + ' searches · ' + p.category + '</div>' +
+      '<div class="trending-bar"><div class="trending-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderSearchCloud() {
+  const cloud = document.getElementById('searchCloud');
+  cloud.innerHTML = TRENDING_SEARCHES.map(function(s) {
+    return '<div class="search-cloud-item ' + (s.size||'') + '" onclick="doSearch(\'' + s.term + '\')">' +
+      '<span>' + s.emoji + '</span>' +
+      '<span>' + s.term + '</span>' +
+      '<span class="sci-count">' + s.count.split(' ')[0] + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function renderTicker() {
+  const items = [...TICKER_PROMOS, ...TICKER_PROMOS]; // duplicate for infinite
+  var html = items.map(function(t) {
+    return '<div class="ticker-item">' +
+      '<span class="ti-emoji">' + t.emoji + '</span>' +
+      '<strong>' + t.biz + '</strong>' +
+      ' — ' + t.text +
+      '<span class="ti-price">' + t.price + '</span>' +
+      '<span class="ti-sep">|</span>' +
+      '</div>';
+  }).join('');
+  document.getElementById('tickerInner').innerHTML = html;
+
+  var trendItems2 = TRENDING_SEARCHES.concat(TRENDING_SEARCHES);
+  var trendHtml = trendItems2.map(function(s) {
+    return '<div class="ticker-item">' +
+      '<span class="ti-emoji">' + s.emoji + '</span>' +
+      '<strong>' + s.term + '</strong>' +
+      '<span class="ti-price">' + s.count + '</span>' +
+      '<span class="ti-sep">|</span>' +
+      '</div>';
+  }).join('');
+  document.getElementById('trendingTicker').innerHTML = trendHtml;
+}
+
+// ===== SEARCH =====
+let searchTimeout;
+const searchInput = document.getElementById('searchInput');
+const searchSugg = document.getElementById('searchSuggestions');
+const searchResults = document.getElementById('searchResults');
+const mainContent = document.getElementById('mainContent');
+
+// Run search immediately — called by button and Enter key
+function runSearch() {
+  var q = searchInput.value.trim();
+  if (q) doSearch(q);
+}
+
+// Enter key on mobile keyboard
+searchInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' || e.keyCode === 13) {
+    e.preventDefault();
+    runSearch();
+  }
+});
+
+searchInput.addEventListener('input', function() {
+  var q = this.value.trim();
+  document.getElementById('searchClear').style.display = q ? 'block' : 'none';
+  clearTimeout(searchTimeout);
+  if (!q) { clearSearch(); return; }
+  // Show suggestions from static array
+  var matches = PRODUCTS.filter(function(p) {
+    return p.name.toLowerCase().includes(q.toLowerCase()) ||
+           p.category.toLowerCase().includes(q.toLowerCase()) ||
+           (p.desc||'').toLowerCase().includes(q.toLowerCase());
+  }).slice(0, 5);
+  if (matches.length) {
+    searchSugg.style.display = 'block';
+    searchSugg.innerHTML = matches.map(function(p) {
+      return '<div class="suggestion-item" onclick="doSearch(\'' + p.name.replace(/'/g,"\\'") + '\')">' +
+        '<span class="sug-icon">' + p.emoji + '</span>' +
+        '<span>' + p.name + '</span>' +
+        '<span style="margin-left:auto;font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">' + p.category + '</span>' +
+        '</div>';
+    }).join('');
+  } else {
+    searchSugg.style.display = 'none';
+  }
+  searchTimeout = setTimeout(function() { doSearch(q); }, 500);
+});
+
+async function doSearch(q) {
+  q = (q || '').trim();
+  if (!q) return;
+  // Dismiss mobile keyboard
+  searchInput.blur();
+  searchInput.value = q;
+  if (searchSugg) searchSugg.style.display = 'none';
+  var clearBtn = document.getElementById('searchClear');
+  if (clearBtn) clearBtn.style.display = 'block';
+  var queryLabel = document.getElementById('searchQueryLabel');
+  var countLabel = document.getElementById('resultsCount');
+  var grid = document.getElementById('resultsGrid');
+  if (queryLabel) queryLabel.textContent = '"' + q + '"';
+  if (countLabel) countLabel.textContent = 'Searching...';
+  if (grid) grid.innerHTML =
+    '<div style="grid-column:1/-1;text-align:center;padding:40px">' +
+    '<div class="spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px"></div>' +
+    '<div style="font-size:13px;color:var(--text-muted)">Finding results...</div></div>';
+  if (searchResults) searchResults.style.display = 'block';
+  if (mainContent) mainContent.classList.add('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Log search event
+  apiFetch('logEvent', { event_type: 'search', query: q });
+
+  // Try live API first
+  var res = await apiFetch('search', { q: q, limit: 30 });
+  if (res.ok && res.results && res.results.length > 0) {
+    if (countLabel) countLabel.textContent = res.count + ' result' + (res.count !== 1 ? 's' : '') + ' found';
+    var cards = '';
+    res.results.forEach(function(p) {
+      try { cards += productCard(apiProductToCard(p)); }
+      catch(e) { console.error('Card error:', e, p); }
+    });
+    if (grid) grid.innerHTML = cards || '<div style="padding:40px;text-align:center;color:var(--text-muted)">Could not render results.</div>';
+  } else if (res.ok && res.count === 0) {
+    if (countLabel) countLabel.textContent = '0 results';
+    if (grid) grid.innerHTML =
+      '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text-muted);font-family:var(--font-mono)">' +
+      'No results for "' + q + '"<br>' +
+      '<span style="font-size:13px;margin-top:8px;display:block">Try: milk, phones, beauty, uniforms, electronics</span></div>';
+  } else {
+    // Fallback to static array
+    var matches = PRODUCTS.filter(function(p) {
+      return p.name.toLowerCase().includes(q.toLowerCase()) ||
+             p.category.toLowerCase().includes(q.toLowerCase()) ||
+             (p.desc||'').toLowerCase().includes(q.toLowerCase());
+    });
+    if (countLabel) countLabel.textContent = matches.length + ' result' + (matches.length !== 1 ? 's' : '');
+    if (grid) grid.innerHTML = matches.length
+      ? matches.map(function(p) { return productCard(p); }).join('')
+      : '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text-muted)">' +
+        'No results for "' + q + '"</div>';
+  }
+}
+
+function clearSearch() {
+  searchInput.value = '';
+  searchSugg.style.display = 'none';
+  document.getElementById('searchClear').style.display = 'none';
+  searchResults.style.display = 'none';
+  mainContent.classList.remove('hidden');
+}
+
+document.addEventListener('click', function(e) {
+  if (!searchSugg.contains(e.target) && e.target !== searchInput) {
+    searchSugg.style.display = 'none';
+  }
+});
+
+// ===== ACTIONS =====
+function viewShop(id) {
+  // Try live products first, then fallback to static
+  var p = null;
+  if (window._liveProducts) {
+    p = window._liveProducts.find(function(x){ return x.id == id; });
+  }
+  if (!p) p = PRODUCTS.find(function(x){ return x.id == id; });
+  if (!p) return;
+  window.open(waURL(p), '_blank');
+}
+
+// ===== COUNTER ANIMATION =====
+function animateCount(el, target, suffix='') {
+  let current = 0;
+  const step = Math.ceil(target / 30);
+  const timer = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = current + suffix;
+    if (current >= target) clearInterval(timer);
+  }, 40);
+}
+
+// ===== LIVE API LOADERS =====
+
+async function loadLiveStats() {
+  var res = await apiFetch('getStats');
+  if (res.ok) {
+    var bizEl = document.getElementById('statBiz');
+    var prodEl = document.getElementById('statProds');
+    var corrEl = document.getElementById('statCorr');
+    if (bizEl) { bizEl.textContent = res.total_businesses || 0; }
+    if (prodEl) { prodEl.textContent = (res.total_products || 0) + '+'; }
+    // Count active corridors
+    var corr = res.corridors || {};
+    var activeCorr = Object.values(corr).filter(function(v){ return v > 0; }).length;
+    if (corrEl) corrEl.textContent = activeCorr + ' / 4';
+    if (document.getElementById('mloCount')) document.getElementById('mloCount').textContent = corr.mlolongo || 0;
+    if (document.getElementById('syoCount')) document.getElementById('syoCount').textContent = corr.syokimau || 0;
+    if (document.getElementById('athCount')) document.getElementById('athCount').textContent = corr.athiriver || 0;
+    if (document.getElementById('pipCount')) document.getElementById('pipCount').textContent = corr.pipeline || 0;
+  }
+}
+
+// Global store for live product lookup
+window._liveProducts = window._liveProducts || [];
+
+async function loadLiveFeatured() {
+  const res = await apiFetch('getFeatured', { limit: 12 });
+  if (res.ok && res.products && res.products.length > 0) {
+    window._liveProducts = (window._liveProducts || []).concat(res.products.map(apiProductToCard));
+    const mapped = res.products.map(apiProductToCard);
+    document.getElementById('featuredGrid').innerHTML = mapped.map(p => productCard(p)).join('');
+  } else {
+    renderFeatured(); // fallback to static
+  }
+}
+
+async function loadLiveTrending() {
+  const res = await apiFetch('getTrending', { limit: 8 });
+  if (res.ok && res.trending && res.trending.length > 0) {
+    const scroll = document.getElementById('trendingScroll');
+    scroll.innerHTML = res.trending.map(function(p, i) {
+      var pct = Math.round(((p.search_count||0) / (res.trending[0].search_count||1)) * 100);
+      var waNum = (p.biz_wa||'').replace(/[^0-9]/g,'');
+      var nm = p.biz_name||p.name||'Shop';
+      return '<div class="trending-card" onclick="openWA(\'' + waNum + '\',\'' + nm + '\')" style="animation-delay:' + (i*0.07) + 's">' +
+        '<div class="trending-rank"><span class="rank-num">' + String(i+1).padStart(2,'0') + '</span><span>🔥 HOT</span></div>' +
+        '<span class="trending-emoji">' + (p.emoji||'📦') + '</span>' +
+        '<div class="trending-name">' + p.name + '</div>' +
+        '<div class="trending-meta">' + (p.search_count||0) + ' searches · ' + p.category + '</div>' +
+        '<div class="trending-bar"><div class="trending-bar-fill" style="width:' + pct + '%"></div></div>' +
+        '</div>';
+    }).join('');
+  } else {
+    renderTrending(); // fallback
+  }
+}
+
+async function loadLiveSearched() {
+  const res = await apiFetch('getSearched', { limit: 12 });
+  if (res.ok && res.searches && res.searches.length > 0) {
+    const cloud = document.getElementById('searchCloud');
+    cloud.innerHTML = res.searches.map(function(s) {
+      return '<div class="search-cloud-item" onclick="doSearch(\'' + s.term.replace(/'/g,"\\'") + '\')">' +
+        '<span>🔍</span>' +
+        '<span>' + s.term + '</span>' +
+        '<span class="sci-count">' + s.count + '</span>' +
+        '</div>';
+    }).join('');
+  } else {
+    renderSearchCloud(); // fallback
+  }
+}
+
+async function loadLiveCorridors() {
+  var corridors = [
+    { key:'mlolongo', gridId:'mloGrid', countId:'mloCount' },
+    { key:'syokimau', gridId:'syoGrid', countId:'syoCount' },
+    { key:'athiriver', gridId:'athGrid', countId:'athCount' },
+    { key:'pipeline',  gridId:'pipGrid', countId:'pipCount' },
+  ];
+  for (var ci = 0; ci < corridors.length; ci++) {
+    var c = corridors[ci];
+    var res = await apiFetch('getByCorrid', { corridor: c.key });
+    var grid = document.getElementById(c.gridId);
+    var countEl = document.getElementById(c.countId);
+    if (res.ok && res.businesses && res.businesses.length > 0) {
+      if (countEl) countEl.textContent = res.businesses.length;
+      if (res.products && res.products.length > 0) {
+        var cards = '';
+        res.products.forEach(function(p) {
+          try { cards += productCard(apiProductToCard(p)); } catch(e){}
+        });
+        if (grid) grid.innerHTML = cards;
+      } else {
+        if (grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:24px;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:13px">🏪 ' + res.businesses.length + ' business' + (res.businesses.length>1?'es':'') + ' registered — products coming soon</div>';
+      }
+    } else {
+      if (countEl) countEl.textContent = '0';
+      if (grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:32px;text-align:center">' +
+        '<div style="font-size:28px;margin-bottom:10px;opacity:0.4">🔜</div>' +
+        '<div style="color:var(--text-muted);font-size:13px;font-family:var(--font-mono)">Coming Soon</div>' +
+        '<div style="color:var(--text-muted);font-size:12px;margin-top:6px">Businesses opening soon in this corridor</div>' +
+        '</div>';
+    }
+  }
+}
+
+async function loadLiveTicker() {
+  const res = await apiFetch('getFeatured', { limit: 20 });
+  if (res.ok && res.products && res.products.length > 0) {
+    const items = [...res.products, ...res.products];
+    var html2 = items.map(function(p) {
+      return '<div class="ticker-item">' +
+        '<span class="ti-emoji">' + (p.emoji||'📦') + '</span>' +
+        '<strong>' + (p.biz_name||p.name) + '</strong>' +
+        ' — ' + p.name +
+        '<span class="ti-price">' + p.price + '</span>' +
+        '<span class="ti-sep">|</span>' +
+        '</div>';
+    }).join('');
+    document.getElementById('tickerInner').innerHTML = html2;
+  } else {
+    renderTicker(); // fallback
+  }
+}
+
+// Map API product shape to card shape
+function apiProductToCard(p) {
+  var corrMap = { mlolongo:'mlo', syokimau:'syo', athiriver:'ath', pipeline:'pip' };
+  var corr = corrMap[p.biz_corridor] || (p.biz_corridor ? p.biz_corridor.slice(0,3) : 'mlo');
+  var tier = p.biz_tier || 'free';
+  var badge = (tier === 'pro' || tier === 'premium') ? 'sponsored' : tier === 'starter' ? 'verified' : null;
+  var bizName = p.biz_name || p.name || 'Shop';
+  var productName = p.name || bizName;
+  var imgUrl = p.image_url || p.img_url || null;
+  // Format seller WA number properly
+  var rawWa = (p.biz_wa || p.wa_number || '').toString().replace(/[^0-9]/g,'');
+  if (rawWa.length === 9) rawWa = '254' + rawWa;
+  if (rawWa.length === 10 && rawWa[0] === '0') rawWa = '254' + rawWa.slice(1);
+  return {
+    id: p.id,
+    name: productName,
+    category: p.category || 'General',
+    desc: p.description || '',
+    price: formatPrice(p.price) || 'Ask for price',
+    oldPrice: p.old_price ? formatPrice(p.old_price) : null,
+    drop: (p.old_price && p.price) ? calcDrop(p.price, p.old_price) : null,
+    emoji: p.emoji || '🏪',
+    img_url: imgUrl,
+    image_url: imgUrl,
+    corridor: corr,
+    badge: badge,
+    waMsg: 'Hi ' + bizName + ', I found you on Pata Hapa (patahapa.co.ke). Interested in: ' + productName,
+    biz_wa: rawWa,
+    wa: rawWa,
+    featured: p.featured || false,
+    searches: p.search_count || 0,
+    hot: (p.search_count || 0) > 50,
+  };
+}
+
+function formatPrice(val) {
+  if (!val && val !== 0) return '';
+  var num = parseFloat(String(val).replace(/[^0-9.]/g,''));
+  if (isNaN(num)) return String(val);
+  return 'KES ' + num.toLocaleString('en-KE');
+}
+
+function calcDrop(price, oldPrice) {
+  var p = parseFloat(String(price||'').replace(/[^0-9.]/g,''));
+  var o = parseFloat(String(oldPrice||'').replace(/[^0-9.]/g,''));
+  if (o > p && o > 0) return Math.round(((o-p)/o)*100) + '%';
+  return null;
+}
+
+function openWA(waNumber, bizName) {
+  var num = (waNumber || '').replace(/[^0-9]/g, '');
+  var msg = 'Hi ' + bizName + ', I found you on Pata Hapa (patahapa.co.ke)! I am interested in your products.';
+  if (!num || num.length < 9) {
+    // No seller number — open WA without number so buyer can paste
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  } else {
+    window.open('https://wa.me/' + num + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+}
+
+// Override doSearch to use live API
+
+
+// ===== INIT =====
+// Load static fallbacks immediately (instant render)
+renderFeatured();
+renderCorridors();
+renderTrending();
+renderSearchCloud();
+renderTicker();
+// Stats loaded from live API in loadLiveStats()
+
+// Then override with live data
+(async () => {
+  await loadLiveStats();
+  await loadLiveFeatured();
+  loadLiveTrending();
+  loadLiveSearched();
+  loadLiveCorridors();
+  loadLiveTicker();
+})();
+</script>
+</body>
+</html>
