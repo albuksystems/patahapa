@@ -206,6 +206,85 @@ body{
 }
 .auth-footer a{color:var(--gold);text-decoration:none}
 
+/* ===== SHARE LOGIN MODAL ===== */
+.share-modal-overlay{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+  padding:24px;
+}
+.share-modal-overlay.open{display:flex}
+.share-modal{
+  background:var(--surface);
+  border:1px solid rgba(245,200,66,0.3);
+  border-radius:var(--radius-lg);
+  width:100%;max-width:400px;
+  overflow:hidden;
+  animation:auth-in 0.3s ease both;
+}
+.share-modal-head{
+  background:linear-gradient(135deg,rgba(37,211,102,0.12),rgba(37,211,102,0.04));
+  border-bottom:1px solid rgba(37,211,102,0.15);
+  padding:20px 24px;
+  text-align:center;
+}
+.share-modal-icon{font-size:40px;display:block;margin-bottom:8px}
+.share-modal-title{
+  font-family:var(--font-head);
+  font-size:22px;letter-spacing:1px;
+  color:var(--text);margin-bottom:4px;
+}
+.share-modal-sub{font-size:13px;color:var(--text-dim)}
+.share-modal-body{padding:20px 24px}
+.login-detail-box{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:16px;
+  font-family:var(--font-mono);
+  font-size:13px;
+}
+.login-detail-row{
+  display:flex;justify-content:space-between;
+  align-items:center;padding:6px 0;
+  border-bottom:1px solid var(--border);
+}
+.login-detail-row:last-child{border-bottom:none}
+.ldr-label{color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.ldr-value{color:var(--gold);font-size:13px;font-weight:500}
+.share-wa-btn{
+  width:100%;padding:14px;
+  background:#25D366;color:#000;
+  font-family:var(--font-head);
+  font-size:18px;letter-spacing:1px;
+  border:none;border-radius:var(--radius);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:10px;
+  transition:all 0.2s;
+}
+.share-wa-btn:hover{background:#1db954;transform:translateY(-1px)}
+.share-skip-btn{
+  width:100%;padding:11px;
+  background:transparent;
+  color:var(--text-dim);
+  font-family:var(--font-body);
+  font-size:13px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.share-skip-btn:hover{border-color:var(--border2);color:var(--text)}
+.share-warning{
+  font-size:11px;color:var(--text-muted);
+  text-align:center;margin-top:12px;
+  font-family:var(--font-mono);
+  line-height:1.6;
+}
+
 /* ===== IMAGE PREVIEW ===== */
 .img-preview-wrap{
   margin-top:10px;border-radius:var(--radius);
@@ -1428,7 +1507,15 @@ let STATE = {
   promos: [],
   currentPage: 'dashboard',
   promoTemplate: 'flash',
-  selectedPromoProduct: null,  // product preloaded into promo generator
+  selectedPromoProduct: null,
+  // Share login modal
+  shareWaNum: '',
+  shareEmail: '',
+  sharePassword: '',
+  shareBizName: '',
+  lastRegEmail: '',
+  lastRegPassword: '',
+  lastRegPhone: '',
 };
 
 // ===== STORAGE =====
@@ -1578,11 +1665,69 @@ async function handleRegister() {
   if (res.ok) {
     saveSession(res.token, res.business);
     STATE.token = res.token; STATE.biz = res.business;
-    showAuthSuccess('Shop registered! Taking you to dashboard…');
-    setTimeout(showApp, 800);
+    // Store registration details for share modal
+    STATE.lastRegEmail = email;
+    STATE.lastRegPassword = password;
+    STATE.lastRegPhone = phone;
+    // Show share login modal instead of auto-redirecting
+    showShareLoginModal(res.business, email, password, phone);
   } else {
     showAuthError(res.error || 'Registration failed.');
   }
+}
+
+// ===== SHARE LOGIN MODAL =====
+function showShareLoginModal(business, email, password, phone) {
+  // Populate modal details
+  document.getElementById('slBizName').textContent = business.name || 'My Shop';
+  document.getElementById('slEmail').textContent = email || '';
+  document.getElementById('slPassword').textContent = password || '';
+
+  // Pre-build WA message
+  var waNum = String(phone || '').replace(/[^0-9]/g, '');
+  if (waNum.length === 10 && waNum.startsWith('0')) waNum = '254' + waNum.slice(1);
+  if (waNum.length === 9) waNum = '254' + waNum;
+
+  // Store for send button
+  STATE.shareWaNum = waNum;
+  STATE.shareEmail = email;
+  STATE.sharePassword = password;
+  STATE.shareBizName = business.name;
+
+  document.getElementById('shareLoginModal').classList.add('open');
+}
+
+function sendLoginToWA() {
+  var bizName = STATE.shareBizName || 'My Shop';
+  var email = STATE.shareEmail || '';
+  var password = STATE.sharePassword || '';
+  var waNum = STATE.shareWaNum || '';
+
+  var msg =
+    '🏪 *Pata Hapa — Login Details*\n\n' +
+    'Shop: *' + bizName + '*\n' +
+    'URL: patahapa.co.ke/business.html\n\n' +
+    '📧 Email: ' + email + '\n' +
+    '🔑 Password: ' + password + '\n\n' +
+    '⚠ Keep this message safe — do not share with anyone.\n\n' +
+    'Powered by Albuk Global · patahapa.co.ke';
+
+  // Send to seller's own number
+  var url = waNum
+    ? 'https://wa.me/' + waNum + '?text=' + encodeURIComponent(msg)
+    : 'https://wa.me/?text=' + encodeURIComponent(msg);
+
+  window.open(url, '_blank');
+
+  // After sending, close and go to dashboard
+  setTimeout(function() {
+    closeShareModal();
+  }, 1500);
+}
+
+function closeShareModal() {
+  document.getElementById('shareLoginModal').classList.remove('open');
+  showApp();
 }
 
 async function handleLogout() {
@@ -2356,6 +2501,47 @@ document.addEventListener('keydown', function(e) {
   }
 });
 </script>
+<!-- ===== SHARE LOGIN MODAL ===== -->
+<div class="share-modal-overlay" id="shareLoginModal">
+  <div class="share-modal">
+    <div class="share-modal-head">
+      <span class="share-modal-icon">🎉</span>
+      <div class="share-modal-title">Shop Registered!</div>
+      <div class="share-modal-sub">Send your login details to WhatsApp so you never forget them</div>
+    </div>
+    <div class="share-modal-body">
+      <div class="login-detail-box">
+        <div class="login-detail-row">
+          <span class="ldr-label">Shop Name</span>
+          <span class="ldr-value" id="slBizName">—</span>
+        </div>
+        <div class="login-detail-row">
+          <span class="ldr-label">Login URL</span>
+          <span class="ldr-value" style="font-size:11px">patahapa.co.ke/business.html</span>
+        </div>
+        <div class="login-detail-row">
+          <span class="ldr-label">Email</span>
+          <span class="ldr-value" id="slEmail">—</span>
+        </div>
+        <div class="login-detail-row">
+          <span class="ldr-label">Password</span>
+          <span class="ldr-value" id="slPassword">—</span>
+        </div>
+      </div>
+      <button class="share-wa-btn" id="shareWaBtn" onclick="sendLoginToWA()">
+        📲 Send to My WhatsApp
+      </button>
+      <button class="share-skip-btn" onclick="closeShareModal()">
+        I'll remember it — Go to Dashboard
+      </button>
+      <div class="share-warning">
+        ⚠ Screenshot or save these details.<br>
+        Your password cannot be recovered without admin support.
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== EDIT PRODUCT MODAL ===== -->
 <div class="modal-overlay" id="editProductModal">
   <div class="modal">
