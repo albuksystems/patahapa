@@ -1507,7 +1507,7 @@ function openShopModal(p) {
     if (res.ok && res.products && res.products.length > 0) {
       prodEl.innerHTML = res.products.map(function(prod) {
         var img = prod.image_url
-          ? '<img class="smp-img" src="' + prod.image_url + '" alt="' + prod.name + '" onerror="this.style.display='none'">'
+         ? '<img class="smp-img" src="' + prod.image_url + '" alt="' + prod.name + '" onerror="this.style.display=&quot;none&quot;">'
           : '<div class="smp-emoji">' + (prod.emoji||'📦') + '</div>';
         return '<div class="smp-item">' + img +
           '<div class="smp-name">' + prod.name + '</div>' +
