@@ -1472,7 +1472,7 @@ function openShopModal(p) {
   var fallbackEmoji = p.emoji || '🏪';
   if (imgUrl) {
     bannerEl.innerHTML = '<img class="shop-modal-banner" src="' + imgUrl + '" alt="shop banner" ' +
-      'onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">' +
+    'onerror="this.style.display=\"none\";this.nextElementSibling.style.display=\"flex\"">' +
       '<div class="shop-modal-banner-placeholder" style="display:none">' + fallbackEmoji + '</div>';
   } else {
     bannerEl.innerHTML = '<div class="shop-modal-banner-placeholder">' + fallbackEmoji + '</div>';
